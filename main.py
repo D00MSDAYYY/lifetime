@@ -35,19 +35,9 @@ def clean_and_plot(file_list, output_image=None):
                 df['timestamp'].str.strip(),  # Удаляем пробелы
                 format='%Y-%m-%d %H:%M:%S.%f'
             )
-            
-            # Преобразование значений (замена запятых на точки для дробных чисел)
-            df['value'] = pd.to_numeric(
-                df['value'].astype(str).str.replace(',', '.'), 
-                errors='coerce'
-            )
-            
+
             # Удаление некорректных данных
             df = df.dropna(subset=['timestamp', 'value'])
-            
-            # Фильтрация физически невозможных значений (ток не может быть отрицательным)
-            if 'beam' in df['tag'].iloc[0].lower():
-                df = df[df['value'] >= 0]
             
             # Сглаживание данных
             window_size = min(15, len(df)//10 or 1)
@@ -84,7 +74,14 @@ def clean_and_plot(file_list, output_image=None):
         plt.ylabel('Beam Current', fontsize=12)
         plt.title('Beam Current Monitoring (Filtered)', fontsize=14)
         plt.grid(True, linestyle='--', alpha=0.6)
-        plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
+        
+        # Измененная легенда (меньше и под графиком)
+        plt.legend(
+            fontsize=8,  # Уменьшенный размер шрифта
+            loc='upper center',  # Расположение по центру
+            bbox_to_anchor=(0.5, -0.1),  # Под графиком
+            ncol=2  # Две колонки для компактности
+        )
         
         plt.tight_layout()
         
@@ -102,7 +99,7 @@ def clean_and_plot(file_list, output_image=None):
 # Пример использования
 if __name__ == "__main__":
     data_files = [
-        './i5beam_5_days/beam_data_2025-06-30.csv',  # Укажите ваш файл
+        './i5beam_5_days/beam_data_2025-06-30.csv',
     ]
     
     clean_and_plot(
