@@ -1,56 +1,80 @@
-import os
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from datetime import datetime
+import os
 
-def split_data_by_days(input_file):
+def plot_daily_beam_current(input_file, output_image=None):
     """
-    Разделяет данные из исходного файла на отдельные файлы по дням,
-    обрабатывая случаи с отсутствующими значениями тока.
+    Строит график тока пучка за день из файла данных
+    
+    Параметры:
+    input_file - путь к файлу с данными за день
+    output_image - путь для сохранения графика (None - показать на экране)
     """
     try:
-        # Получаем имя файла без расширения для создания папки
-        base_name = os.path.splitext(os.path.basename(input_file))[0]
-        output_dir = f"{base_name}_5_days"
-        
-        # Создаем директорию, если ее нет
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # Читаем данные из файла, обрабатывая пустые значения
+        # Чтение данных с обработкой пустых значений
         df = pd.read_csv(input_file, sep=';', header=None,
                         names=['sensor', 'timestamp', 'current'],
-                        decimal=',', na_filter=True,
-                        na_values=['', ' ', 'NA', 'N/A'])
+                        decimal=',', na_values=['', ' ', 'NA', 'N/A'])
         
-        # Заменяем NaN на пустую строку (как в исходном файле)
-        df['current'] = df['current'].fillna('')
+        # Преобразование времени и обработка пустых значений
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        df['current'] = pd.to_numeric(df['current'], errors='coerce')  # преобразуем в числа
         
-        # Преобразуем timestamp в datetime и извлекаем дату
-        df['date'] = pd.to_datetime(df['timestamp']).dt.date
+        # Создание графика
+        plt.figure(figsize=(15, 6))
         
-        # Группируем данные по дням
-        grouped = df.groupby('date')
+        # Основной график тока
+        plt.plot(df['timestamp'], df['current'], 
+                'b-', linewidth=1, label='Ток пучка')
         
-        # Обрабатываем каждый день отдельно
-        for date, day_data in grouped:
-            # Формируем имя файла для этого дня
-            date_str = date.strftime('%Y-%m-%d')
-            output_filename = os.path.join(output_dir, f'beam_data_{date_str}.csv')
+        # Настройка осей
+        ax = plt.gca()
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
+        ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+        
+        # Подписи и оформление
+        plt.xlabel('Время', fontsize=12)
+        plt.ylabel('Ток пучка, А', fontsize=12)
+        
+        # Извлекаем дату из первого значения
+        date_str = df['timestamp'].iloc[0].strftime('%Y-%m-%d')
+        plt.title(f'Ток пучка за {date_str}', fontsize=14)
+        
+        plt.grid(True, linestyle='--', alpha=0.6)
+        plt.legend(fontsize=10)
+        
+        # Оптимизация размещения
+        plt.tight_layout()
+        
+        # Сохранение или отображение
+        if output_image:
+            plt.savefig(output_image, dpi=300)
+            print(f"График сохранен в файл: {output_image}")
+        else:
+            plt.show()
             
-            # Сохраняем данные в исходном формате
-            with open(output_filename, 'w') as f:
-                for _, row in day_data.iterrows():
-                    line = f"{row['sensor']};{row['timestamp']};{row['current']}\n"
-                    f.write(line)
-            
-            print(f'Создан файл: {output_filename}')
-            
-        print(f'\nВсего создано {len(grouped)} файлов в директории {output_dir}')
+        plt.close()
         
-    except FileNotFoundError:
-        print(f"Ошибка: файл {input_file} не найден")
     except Exception as e:
-        print(f"Произошла ошибка: {str(e)}")
+        print(f"Ошибка при построении графика: {str(e)}")
 
 # Пример использования:
+# Для одного файла:
+# plot_daily_beam_current('beam_data_2025-06-30.csv', 'beam_current_2025-06-30.png')
 
-split_data_by_days('./beam_data/i5beam.csv')
+# Для всех файлов в папке:
+import glob
+
+def plot_all_days(data_folder, output_folder='daily_plots'):
+    """Строит графики для всех файлов в папке"""
+    os.makedirs(output_folder, exist_ok=True)
+    
+    for day_file in glob.glob(os.path.join(data_folder, 'beam_data_*.csv')):
+        date_str = os.path.basename(day_file)[10:-4]  # извлекаем дату из имени файла
+        output_file = os.path.join(output_folder, f'beam_current_{date_str}.png')
+        plot_daily_beam_current(day_file, output_file)
+
+
+plot_all_days('./i5beam_5_days')
