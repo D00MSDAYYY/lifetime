@@ -99,6 +99,7 @@ def clean_and_plot(file_list, output_image=None):
 # Пример использования
 if __name__ == "__main__":
     data_files = [
+        './i5lifetime_5_days/beam_data_2025-06-30.csv',
         './i5beam_5_days/beam_data_2025-06-30.csv',
     ]
     
