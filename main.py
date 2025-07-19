@@ -1,81 +1,111 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from datetime import datetime
+from scipy.signal import savgol_filter
 import os
 
-def plot_multiple_graphs_from_files(file_list, output_image=None):
+def clean_and_plot(file_list, output_image=None):
     """
-    Строит несколько графиков на одной картинке из списка файлов
+    Фильтрация шумов и построение графиков с очищенными данными
     
     Параметры:
-    file_list - список путей к файлам с данными (каждый файл содержит: тэг; время; значение)
-    output_image - путь для сохранения графика (None - показать на экране)
+    file_list - список файлов с данными
+    output_image - путь для сохранения графика
     """
     try:
-        # Создаем фигуру для всех графиков
         plt.figure(figsize=(15, 8))
         
-        # Обрабатываем каждый файл
         for file_path in file_list:
-            # Читаем данные
+            # Чтение данных с учетом формата
             df = pd.read_csv(
                 file_path, 
                 sep=';', 
                 header=None,
+                usecols=[0, 1, 2],  # Явно указываем какие столбцы читать (игнорируем последний пустой)
                 names=['tag', 'timestamp', 'value'],
-                decimal=',', 
-                na_values=['', ' ', 'NA', 'N/A']
+                engine='python'
             )
             
-            # Преобразуем время и значения
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df['value'] = pd.to_numeric(df['value'], errors='coerce')
+            # Очистка данных
+            df = df.dropna(how='all')  # Удаление полностью пустых строк
             
-            # Извлекаем уникальный тэг (название графика)
+            # Преобразование времени
+            df['timestamp'] = pd.to_datetime(
+                df['timestamp'].str.strip(),  # Удаляем пробелы
+                format='%Y-%m-%d %H:%M:%S.%f'
+            )
+            
+            # Преобразование значений (замена запятых на точки для дробных чисел)
+            df['value'] = pd.to_numeric(
+                df['value'].astype(str).str.replace(',', '.'), 
+                errors='coerce'
+            )
+            
+            # Удаление некорректных данных
+            df = df.dropna(subset=['timestamp', 'value'])
+            
+            # Фильтрация физически невозможных значений (ток не может быть отрицательным)
+            if 'beam' in df['tag'].iloc[0].lower():
+                df = df[df['value'] >= 0]
+            
+            # Сглаживание данных
+            window_size = min(15, len(df)//10 or 1)
+            df['smoothed'] = df['value'].rolling(
+                window=window_size, 
+                center=True, 
+                min_periods=1
+            ).mean()
+            
+            # Построение графиков
             tag = df['tag'].iloc[0] if not df['tag'].isnull().all() else os.path.basename(file_path)
             
-            # Строим график
             plt.plot(
                 df['timestamp'], 
                 df['value'], 
-                label=tag,
-                linewidth=1,
-                marker='o' if len(df) < 100 else None  # маркеры только для коротких рядов
+                alpha=0.3,
+                label=f'{tag} (raw)',
+                color='gray'
+            )
+            
+            plt.plot(
+                df['timestamp'], 
+                df['smoothed'], 
+                label=f'{tag} (filtered)',
+                linewidth=2
             )
         
-        # Настраиваем общий график
+        # Оформление графика
         ax = plt.gca()
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
         ax.xaxis.set_major_locator(mdates.AutoDateLocator())
         
-        plt.xlabel('Время', fontsize=12)
-        plt.ylabel('Значение', fontsize=12)
-        plt.title('Сравнение показателей', fontsize=14)
+        plt.xlabel('Time', fontsize=12)
+        plt.ylabel('Beam Current', fontsize=12)
+        plt.title('Beam Current Monitoring (Filtered)', fontsize=14)
         plt.grid(True, linestyle='--', alpha=0.6)
-        plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')  # легенда справа
+        plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
         
         plt.tight_layout()
         
-        # Сохраняем или показываем
         if output_image:
             plt.savefig(output_image, dpi=300, bbox_inches='tight')
-            print(f"График сохранен в: {output_image}")
+            print(f"Graph saved to: {output_image}")
         else:
             plt.show()
             
         plt.close()
         
     except Exception as e:
-        print(f"Ошибка при построении графиков: {str(e)}")
+        print(f"Error: {str(e)}")
 
 # Пример использования
 if __name__ == "__main__":
-    files = [
-        'i5energy_5_days/beam_data_2025-06-30.csv'
+    data_files = [
+        './i5beam_5_days/beam_data_2025-06-30.csv',  # Укажите ваш файл
     ]
     
-    plot_multiple_graphs_from_files(
-        file_list=files,
-        output_image='combined_graphs.png'
+    clean_and_plot(
+        file_list=data_files,
+        output_image='beam_current_filtered.png'
     )
