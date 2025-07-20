@@ -6,127 +6,101 @@ import os
 from scipy.signal import savgol_filter
 from pykalman import KalmanFilter
 
-
 # Физические константы
 e = 1.6e-19  # элементарный заряд [Кл]
 
-def calculate_lifetime(df, revolution_freq=3.1e6):
+def calculate_lifetime(df_current, revolution_freq=2.38e6):
 	"""
 	Расчет времени жизни пучка через экспоненциальный распад
 	с учетом миллисекундного разрешения временных меток
 	
 	Параметры:
-	df - DataFrame с данными о токе
+	df_current - DataFrame с данными о токе
 	revolution_freq - частота обращения частиц [Гц]
 	
 	Возвращает:
 	Series с временем жизни в часах
 	"""
+	df = df_current.copy()
 	# Конвертируем ток в число частиц
-	df['N'] = df['value'] / (e * revolution_freq)
+	df['N'] = df_current['value'] / (e * revolution_freq)
 	
 	# Вычисляем разницу между текущим и предыдущим значением
-	df['delta_t'] = df['timestamp'].diff().dt.total_seconds()
+	df['delta_t'] = df_current['timestamp'].diff().dt.total_seconds()
 	
 	# Расчет tau по формуле: N_curr = N_0 * exp(-Δt/τ)
 	with np.errstate(divide='ignore', invalid='ignore'):
 		df['tau'] = -df['delta_t'] / np.log(df['N'] / df['N'].shift(1))
 	
 	# Переводим секунды в часы и убираем выбросы
-	df['lifetime'] = df['tau'] / 3600
-	df['lifetime'] = df['lifetime'].where(df['lifetime'].between(0, 1000))  # Фильтр нереальных значений
+	df['tag'] = "calculated_lifetime"
+	df['value'] = df['tau'] / 3600
+	df['value'] = df['value'].where(df['value'].between(0, 1000))  # Фильтр нереальных значений
 	
-	return df['lifetime']
+	return df
 
-def plot(file_list, output_image=None, output_csv=None):
+def df_from_file(file_path):
+	"""
+	Загрузка данных из файла
+	"""
+	df = pd.read_csv(
+		file_path, 
+		sep=';', 
+		header=None,
+		usecols=[0, 1, 2],
+		names=['tag', 'timestamp', 'value'],
+		engine='python',
+		na_values=[''],
+		skipinitialspace=True
+	)
+	
+	# Преобразование данных
+	df['timestamp'] = pd.to_datetime(
+		df['timestamp'].str.strip(),
+		format='%Y-%m-%d %H:%M:%S.%f',
+		errors='coerce'
+	)
+	
+	df['value'] = pd.to_numeric(
+		df['value'].astype(str).str.strip().str.replace(',', '.'),
+		errors='coerce'
+	)
+	
+	df.dropna(subset=['timestamp', 'value'], inplace=True)
+	return df
+
+def plot(df_list, output_image=None, output_csv=None):
 	"""
 	Построение графиков тока и времени жизни пучка с миллисекундным разрешением
+	Каждый график выводится в отдельном ряду
 	"""
 	try:
-		fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(20, 12), sharex=True)
+		# Создаем subplots по количеству переданных DataFrame
+		fig, axes = plt.subplots(len(df_list), 1, figsize=(20, 6*len(df_list)), sharex=True)
 		
-		for file_path in file_list:
-			# Чтение данных с учетом формата
-			df = pd.read_csv(
-				file_path, 
-				sep=';', 
-				header=None,
-				usecols=[0, 1, 2],
-				names=['tag', 'timestamp', 'value'],
-				engine='python',
-				na_values=[''],
-				skipinitialspace=True
-			)
-			
-			# Преобразование timestamp в datetime с миллисекундной точностью
-			df['timestamp'] = pd.to_datetime(
-				df['timestamp'].str.strip(),  # Удаление пробелов для строк
-				format='%Y-%m-%d %H:%M:%S.%f',
-				errors='coerce'
-			)
-			
-			# Преобразование значения тока в числовой формат
-			df['value'] = pd.to_numeric(
-				df['value'].astype(str).str.strip().str.replace(',', '.'),
-				errors='coerce'
-			)
-			
+		# Если передан только один DataFrame, axes будет не массивом, а одиночным объектом
+		if len(df_list) == 1:
+			axes = [axes]
+		
+		for i, (df, ax) in enumerate(zip(df_list, axes)):
 			# Удаление строк с NaN значениями
 			df.dropna(subset=['timestamp', 'value'], inplace=True)
-			
-			# Сглаживание данных
-			window_size = min(
-				31,  # Максимальный размер окна
-				max(
-					3,  # Минимальный размер окна
-					len(df) // 1000  # 1 точка на 1000 строк
-				)
-			)
-			df['value'] = df['value'].rolling(
-			window=window_size, 
-			center=True, 
-			min_periods=1
-			).mean()
 
-			# df['value'] = savgol_filter( 
-			# 	df['value'],
-			# 	window_length=min(21, len(df)-1 if len(df)%2 == 0 else len(df)),
-			# 	polyorder=3
-			# )
-
-			# kf = KalmanFilter(initial_state_mean=df['value'].iloc[0],
-			# 	transition_matrices=[1],
-			# 	observation_matrices=[1],
-			# 	observation_covariance=0.5,
-			# 	transition_covariance=0.01)
-			# df['value'], _ = kf.filter(df['value'].values)
-
-			# Расчет времени жизни
-			df['lifetime'] = calculate_lifetime(df)
-			
 			# Построение графиков
-			tag = df['tag'].iloc[0] if not df['tag'].isnull().all() else os.path.basename(file_path)
+			tag = df['tag'].iloc[0] 
 			
-			ax1.plot(df['timestamp'], df['value'], label=f'{tag} (ток)', linewidth=1)
-			ax2.plot(df['timestamp'], df['lifetime'], label=f'{tag} (время жизни)', color='red', linewidth=1)
-		
-		# Оформление графиков
-		ax1.set_ylabel('Ток пучка [A]', fontsize=12)
-		ax2.set_ylabel('Время жизни [часы]', fontsize=12)
-		ax2.set_xlabel('Время', fontsize=12)
-		
-		# Форматирование оси времени с миллисекундной точностью
-		date_format = mdates.DateFormatter('%Y-%m-%d %H:%M:%S.%f')
-		ax1.xaxis.set_major_formatter(date_format)
-		fig.autofmt_xdate(rotation=45)
-		
-		# Улучшенное отображение сетки
-		for ax in [ax1, ax2]:
+			# График тока
+			ax.plot(df['timestamp'], df['value'], label=f'{tag}', linewidth=1)
 			ax.grid(True, linestyle='--', alpha=0.6)
 			ax.legend(fontsize=10)
 			ax.tick_params(axis='both', which='major', labelsize=10)
 		
-		plt.suptitle('Мониторинг тока и времени жизни пучка (миллисекундное разрешение)', fontsize=14)
+		# Общие настройки для всех графиков
+		axes[-1].set_xlabel('Время', fontsize=12)
+		date_format = mdates.DateFormatter('%Y-%m-%d %H:%M:%S')
+		axes[0].xaxis.set_major_formatter(date_format)
+		fig.autofmt_xdate(rotation=45)
+		plt.suptitle('Мониторинг параметров пучка', fontsize=14)
 		plt.tight_layout()
 		
 		if output_image:
@@ -134,7 +108,8 @@ def plot(file_list, output_image=None, output_csv=None):
 			print(f"График сохранен в: {output_image}")
 		
 		if output_csv:
-			df[['timestamp', 'value', 'lifetime']].to_csv(output_csv, index=False)
+			combined_df = pd.concat(df_list)
+			combined_df.to_csv(output_csv, index=False)
 			print(f"Данные сохранены в: {output_csv}")
 			
 		plt.show()
@@ -142,11 +117,44 @@ def plot(file_list, output_image=None, output_csv=None):
 	except Exception as e:
 		print(f"Ошибка: {str(e)}")
 		raise
+	
 
-# Пример использования
+def auto_window_size(df_series, max_window=31):
+	std = df_series.std()
+	if std < 0.1 * df_series.mean():
+		return min(5, max_window)  # Мало шума
+	else:
+		return min(max(7, int(len(df_series)/1000)), max_window)
+
+def auto_filter(df, window_size=None):
+
+	if window_size is None:
+		window_size = auto_window_size(df['value'])
+
+	print(window_size)
+
+	df_copy = df.copy()
+	df_copy['value'] = df['value'].rolling(
+		window=window_size, 
+		center=True, 
+		min_periods=1
+	).mean()
+
+	return df_copy
+		
+
+
 if __name__ == "__main__":
+	# Загрузка данных
+	df_current = auto_filter(df_from_file('./i5beam_5_days/beam_data_2025-07-02.csv'),50)
+	df_predefined_lifetime = auto_filter(df_from_file('./i5lifetime_5_days/beam_data_2025-07-02.csv'),50)
+
+
+	df_calculated_lifetime = auto_filter(calculate_lifetime(df_current),300)
+
 	plot(
-		file_list=['./i5beam_5_days/beam_data_2025-07-03.csv'],
-		output_image='beam_lifetime_ms.png',
-		output_csv='beam_lifetime_ms.csv'
+		df_list=[df_current,
+				df_predefined_lifetime,
+				df_calculated_lifetime],
+		output_image='plot.png'
 	)
