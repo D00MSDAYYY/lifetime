@@ -1,9 +1,10 @@
 import math
 import pandas as pd
 import numpy as np
-import constants
+from scipy import constants
+# import siberia2
 
-def simple_scattering(df_current, revolution_freq=2.38e6):
+def simple_scattering(df_current, revolution_freq):
 	"""
 	Расчет времени жизни пучка через экспоненциальный распад
 	с учетом миллисекундного разрешения временных меток

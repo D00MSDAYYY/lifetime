@@ -4,9 +4,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from scipy.signal import savgol_filter
+import CONSTANTS
 
-import constants
+from scipy import constants
 from scattering.simple import simple_scattering
 from scattering.coulumb import coulomb_scattering_wiedermann
 
@@ -102,8 +102,6 @@ def auto_filter(df, window_size=None):
 	if window_size is None:
 		window_size = auto_window_size(df['value'])
 
-	print(window_size)
-
 	df_copy = df.copy()
 	df_copy['value'] = df['value'].rolling(
 		window=window_size, 
@@ -121,7 +119,7 @@ if __name__ == "__main__":
 	df_current = auto_filter(df_from_file('./i5beam_5_days/beam_data_2025-07-02.csv'),50)
 	df_predefined_lifetime = auto_filter(df_from_file('./i5lifetime_5_days/beam_data_2025-07-02.csv'),50)
 
-	# df_simple_lifetime = auto_filter(simple_scattering(df_current),300)
+	# df_simple_lifetime = auto_filter(simple_scattering(df_current,CONSTANTS.siberia2.RevolutionFrequency),300)
 	# plot(
 	# 	df_list=[df_current,
 	# 			df_predefined_lifetime,
@@ -132,19 +130,18 @@ if __name__ == "__main__":
 	# ################################################################################
 
 	# Параметры для расчёта времени жизни (пример для электронного пучка в N₂)
-	beta = 0.9999999       # ≈1 для релятивистских частиц
-	P_Torr = 1e-9          # Давление [Торр] (пример для сверхвысокого вакуума)
+	beta = 1       # ≈1 для релятивистских частиц
+	P_Torr = CONSTANTS.siberia2.P_Torr          # Давление [Торр] (пример для сверхвысокого вакуума)
 	z = 1                  # Заряд электрона
 	Z = 7                  # Заряд ядра азота
-	theta_max =  math.sqrt(constants.siberia2.eA  /  constants.siberia2.AverageBetatronFunction )  # Максимальный угол рассеяния [рад]
+	theta_max =  math.sqrt(CONSTANTS.siberia2.eA  /  CONSTANTS.siberia2.AverageBetatronFunction )  # Максимальный угол рассеяния [рад]
 
 	# Предположим, что импульс p = 2.5 ГэВ/c (переводим в CGS: 1 ГэВ/c ≈ 1.602e-2 г·см/с)
-	p_gev = 2.5            # Импульс [ГэВ/c]
+	p_gev = CONSTANTS.siberia2.Energy_GeV            # Импульс (приблизительно) [ГэВ/c]
 	p_cgs = p_gev * 1.602e-2  # Импульс [г·см/с]
 
 	# Расчёт времени жизни
 	tau_hours = coulomb_scattering_wiedermann(beta, P_Torr, z, Z, p_cgs, theta_max)
-	print(f"Расчётное время жизни из-за рассеяния на газе: {tau_hours:.2f} часов")
 
 	# Создаём DataFrame с расчётным временем жизни (для визуализации)
 	df_calculated_lifetime = df_current.copy()
@@ -157,5 +154,10 @@ if __name__ == "__main__":
 				df_calculated_lifetime],
 		output_image='./plots/coulomb_scattering.png'
 	)
+
+	
+
+	# ################################################################################
+
 
 

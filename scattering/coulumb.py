@@ -1,45 +1,48 @@
 import math
-import constants
+import pandas as pd
+import CONSTANTS
 
-
-import math
+from scipy import constants
 
 def coulomb_scattering_wiedermann(beta, P_Torr, z, Z, p, theta_max):
-    """
-    Вычисляет время жизни пучка из-за рассеяния на остаточном газе в системе CGS.
-    
-    Параметры:
-    beta : отношение скорости частиц к скорости света [безразмерно]
-    P_Torr : давление газа [Торр]
-    z : заряд ускоряемой частицы (для электрона z=1)
-    Z : заряд ядра атома газа (для N₂ Z=7)
-    p : импульс пучка [г·см/с]
-    theta_max : максимальный угол рассеяния [радианы]
+	"""
+	Вычисляет время жизни пучка из-за рассеяния на остаточном газе в системе CGS.
+	
+	Параметры:
+	beta : отношение скорости частиц к скорости света [безразмерно]
+	P_Torr : давление газа [Торр]
+	z : заряд ускоряемой частицы (для электрона z=1)
+	Z : заряд ядра атома газа (для N₂ Z=7)
+	p : импульс пучка [г·см/с]
+	theta_max : максимальный угол рассеяния [радианы]
 
-    Возвращает:
-    tau_hours : время жизни [часы]
-    """
-    # Константы в системе CGS
-    c = 2.998e10          # Скорость света [см/с]
-    e = 4.803e-10         # Элементарный заряд [см³/²·г¹/²·с⁻¹] (статикулон)
-    N_Avogadro = 6.022e23 # Число Авогадро [моль⁻¹]
+	Возвращает:
+	tau_hours : время жизни [часы]
+	"""
 
-    # Проверка входных параметров
-    if beta <= 0 or beta > 1:
-        raise ValueError("beta должен быть в диапазоне (0, 1]")
-    if P_Torr <= 0:
-        raise ValueError("Давление должно быть положительным")
+	# Расчёт компонентов формулы
+	paren = (z * Z * CONSTANTS.CGS.e**2 / (2 * beta * CONSTANTS.CGS.c * p))**2
+	tmp = CONSTANTS.CGS.c * beta * constants.Avogadro * P_Torr / 760 * ( paren ) * 4 * math.pi / (math.tan(theta_max / 2)**2)
+	tau = 1 / tmp
 
-    # Расчёт компонентов формулы
-    tmp1 = c * beta * N_Avogadro  # [см/с * моль⁻¹]
-    tmp2 = P_Torr / 760           # Пересчёт в атмосферы
-    tmp3 = (z * Z * e**2 / (2 * beta * c * p))**2  # [статикулон⁴·с²·г⁻²·см⁻²]
-    tmp4 = 4 * math.pi / (math.tan(theta_max / 2))**2  # Безразмерно
+	tau_hours = tau / 3600  # Перевод в часы
 
-    tau = 1 / (tmp1 * tmp2 * tmp3 * tmp4)  # Время жизни в секундах
-    tau_hours = tau / 3600  # Перевод в часы
+	return tau_hours
 
-    return tau_hours
+
+def coulumb_scattering_zaycev(df_current, revolution_freq, beta, P_Torr, z, Z, p, theta_max): 
+	
+	df = df_current.copy()
+	df['N'] = df_current['value'] / (constants.e * revolution_freq)
+	
+	n = 2 * 2.68675E19 *  P_Torr / 760 
+
+	integral_tmp = 2 / ( math.tan( theta_max / 2 )**2 )
+	some_tmp = 1 / ( 4 * math.pi ) * ( z * Z * CONSTANTS.CGS.e / ( 2 * beta * CONSTANTS.CGS.c * p ) )
+
+	df['derivation'] = -1 * CONSTANTS.CGS.c * beta * n * df['N'] 
+
+	
 
 # def coulumb_scattering_hours_wiedermann(p, eA, beta, P):
 # 	"""
@@ -61,24 +64,24 @@ def coulomb_scattering_wiedermann(beta, P_Torr, z, Z, p, theta_max):
  
 # 	return tau
 
-def coulumb_scattering_seconds_chao(beta, nZ, Z, A_perp, beta_perp, gamma):
-	"""
-	Вычисляет время жизни пучка из-за рассеяния на остаточном газе. стр 272 
+# def coulumb_scattering_seconds_chao(beta, nZ, Z, A_perp, beta_perp, gamma):
+# 	"""
+# 	Вычисляет время жизни пучка из-за рассеяния на остаточном газе. стр 272 
 	
-	Параметры:
-	beta : относительная скорость частицы
-	nZ : количество атомов на одну молекулу газа
-	p : импульс пучка 
-	theta_max : максимально допустимый угол рассеяния относительно движения частицы
-	eA : acceptance of the beam transporl line? [mm mrad]
+# 	Параметры:
+# 	beta : относительная скорость частицы
+# 	nZ : количество атомов на одну молекулу газа
+# 	p : импульс пучка 
+# 	theta_max : максимально допустимый угол рассеяния относительно движения частицы
+# 	eA : acceptance of the beam transporl line? [mm mrad]
 	
-	Возвращает:
-	tau : время жизни [часы]
-	"""
-	ng = 9.656E24 * nZ
-	re = 2.8179403267E-15
-	sigma_el = 2 * math.pi * re**2 * Z**2 * beta_perp / ( gamma**2 * A_perp )
+# 	Возвращает:
+# 	tau : время жизни [часы]
+# 	"""
+# 	ng = 9.656E24 * nZ
+# 	re = 2.8179403267E-15
+# 	sigma_el = 2 * math.pi * re**2 * Z**2 * beta_perp / ( gamma**2 * A_perp )
  
-	tau = 1 / ( ng * beta * c * sigma_el )
+# 	tau = 1 / ( ng * beta * c * sigma_el )
 	
-	return tau
+# 	return tau
