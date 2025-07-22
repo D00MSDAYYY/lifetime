@@ -2,7 +2,7 @@ import math
 import pandas as pd
 import numpy as np
 from scipy import constants
-# import siberia2
+
 
 def simple_scattering(df_current, revolution_freq):
 	"""
