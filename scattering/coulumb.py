@@ -1,5 +1,5 @@
 import math
-import CONSTANTS
+import CONFIG
 
 from scipy import constants
 
@@ -20,9 +20,9 @@ def coulomb_scattering_wiedermann(beta, P_Torr, z, Z, p, theta_max):
 	"""
 
 	# Расчёт компонентов формулы
-	paren = (z * Z * CONSTANTS.CGS.e**2 / (2 * beta * CONSTANTS.CGS.c * p))**2
-	tmp = CONSTANTS.CGS.c * beta * constants.Avogadro * P_Torr / 760 * ( paren ) * 4 * math.pi / (math.tan(theta_max / 2)**2)
-	tau = 1 / tmp
+	paren = (z * Z * CONFIG.CGS.e**2 / (2 * beta * CONFIG.CGS.c * p))**2
+	tau_inv = 2 * CONFIG.CGS.c * beta * constants.Avogadro * P_Torr / 760 * ( paren ) * 4 * math.pi / (math.tan(theta_max / 2)**2)
+	tau = 1 / tau_inv
 
 	tau_hours = tau / 3600  # Перевод в часы
 
@@ -45,7 +45,7 @@ def coulomb_scattering_zaycev(df_current, revolution_freq, beta, P_Torr, z, Z, p
 	df : DataFrame с колонками 'N', 'derivation', 'tau'
 	"""
 	df = df_current.copy()
-	df['tag'] = 'zaycev'
+	df['tag'] = 'coulomb_zaycev'
 	
 	# Число частиц
 	df['N'] = df_current['value'] / (constants.e * revolution_freq)
@@ -55,9 +55,9 @@ def coulomb_scattering_zaycev(df_current, revolution_freq, beta, P_Torr, z, Z, p
 	
 	# Вычисление производной dN/dt
 	integral_tmp = 2 / ( math.tan( theta_max / 2 )**2 )
-	some_tmp = 1 / ( 4 * math.pi * constants.epsilon_0 ) * ( z * Z * CONSTANTS.CGS.e / ( 2 * beta * CONSTANTS.CGS.c * p ) )
+	some_tmp = 1 / ( 4 * math.pi * constants.epsilon_0 ) * ( z * Z * CONFIG.CGS.e / ( 2 * beta * CONFIG.CGS.c * p ) )
 	
-	df['derivation'] = -1 * 2 * math.pi * CONSTANTS.CGS.c * beta * n * df['N'] * (4 * math.pi * some_tmp * integral_tmp)
+	df['derivation'] = -1 * 2 * math.pi * CONFIG.CGS.c * beta * n * df['N'] * (4 * math.pi * some_tmp * integral_tmp)
 
 	# Время жизни tau = -N / (dN/dt)
 	df['value'] = -df['N'] / df['derivation'] / 3600
