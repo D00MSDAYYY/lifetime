@@ -127,25 +127,26 @@ if __name__ == "__main__":
 	
 	# ################################################################################
 
-	theta_max =  math.sqrt(CONFIG.siberia2.eA / CONFIG.siberia2.AverageBetatronFunction)   # Максимальный угол рассеяния [рад]
+	theta_max = 1e-3  # Фиксированное малое значение для оценки
+	p_CGS = CONFIG.siberia2.gamma * CONFIG.siberia2.beta * CONFIG.CGS.e_mass * 9.1094E-28
 
 	coulomb_tau_hours = coulomb_scattering_wiedermann(CONFIG.siberia2.beta, 
 														CONFIG.siberia2.P_Torr, 
 														CONFIG.z,
 														CONFIG.Z_avg,
-														CONFIG.siberia2.Energy_GeV,
+														p_CGS,
 														theta_max)
 
 	df_coulomb_lifetime_wiedermann = df_current_predefined.copy()
 	df_coulomb_lifetime_wiedermann['tag'] = 'coulomb_wiedermann'
-	df_coulomb_lifetime_wiedermann['value'] = coulomb_tau_hours  # Просто постоянное значение для примера
+	df_coulomb_lifetime_wiedermann['value'] = coulomb_tau_hours  
 	print(df_coulomb_lifetime_wiedermann)
 
 	df_lifetime_zaycev = coulomb_scattering_zaycev(df_current_predefined, 
 												CONFIG.siberia2.RevolutionFrequency,
 												CONFIG.siberia2.beta, 
 												CONFIG.siberia2.P_Torr,
-												CONFIG.z, 
+												1, 
 												CONFIG.Z_avg, 
 												CONFIG.siberia2.Energy_GeV, 
 												theta_max)

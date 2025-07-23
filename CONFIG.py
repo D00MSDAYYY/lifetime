@@ -34,6 +34,7 @@ class _aux_CGS:
 CGS = _aux_CGS()
 
 CGS.e = 4.803e-10 # Элементарный заряд [см³/²·г¹/²·с⁻¹] (статикулон)
+CGS.e_mass = 9.1094E-28 # граммы
 CGS.c = 2.998e10          # Скорость света [см/с]
 
 
@@ -51,5 +52,6 @@ siberia2.P_Pa = 1E-7
 siberia2.P_Torr = siberia2.P_Pa * ( 7.50062 * 1E-3 )
 siberia2.RevolutionFrequency = 2.4147E6
 siberia2.Energy_GeV = 2.3
+siberia2.gamma = siberia2.Energy_GeV / 0.000511
 
 
