@@ -26,10 +26,6 @@ def coulomb_scattering_wiedermann(beta, P_Torr, z, Z, p, theta_max):
 	
 	tau = 1 / tau_inv
 
-	print(paren)
-	print(tau_inv)
-	print(constants.Avogadro)
-
 	tau_hours = tau / 3600  # Перевод в часы
 
 	return tau_hours

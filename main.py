@@ -7,8 +7,13 @@ import matplotlib.dates as mdates
 import CONFIG
 
 from scattering.simple import simple_scattering
+from scattering.pascal_adapted import pascal_scattering
 from scattering.coulumb import coulomb_scattering_wiedermann, coulomb_scattering_zaycev, coulomb_scattering_chao
 from scattering.bremstahlung import bremstahlung_scattering_chao
+
+class _aux_Data:
+    pass
+lifetime = _aux_Data()
 
 def df_from_file(file_path):
 	"""
@@ -112,37 +117,24 @@ if __name__ == "__main__":
 
 	# ################################################################################
 
-	# df_lifetime_simple = auto_filter(simple_scattering(df_current_predefined, 
-	# 												CONFIG.siberia2.RevolutionFrequency), 
-	# 								300)
+	lifetime.simple = auto_filter(simple_scattering(df_current_predefined, 
+													CONFIG.siberia2.RevolutionFrequency), 300)
 
-	# plot(
-	# 	df_list=[
-	# 		df_current_predefined,
-	# 		df_lifetime_predefined,
-	# 		df_lifetime_simple
-	# 		],
-	# 	output_image='./plots/coulumb_simple.png'
-	# )
-	
 	# ################################################################################
 
 	theta_max = 1e-3  # Фиксированное малое значение для оценки
 	p_CGS = CONFIG.siberia2.gamma * CONFIG.siberia2.beta * CONFIG.CGS.e_mass * 9.1094E-28
 
-	coulomb_tau_hours = coulomb_scattering_wiedermann(CONFIG.siberia2.beta, 
+	lifetime.wiedermann = df_current_predefined.copy()
+	lifetime.wiedermann['tag'] = 'coulomb_wiedermann'
+	lifetime.wiedermann['value'] = coulomb_scattering_wiedermann(CONFIG.siberia2.beta, 
 														CONFIG.siberia2.P_Torr, 
 														CONFIG.z,
 														CONFIG.Z_avg,
 														p_CGS,
-														theta_max)
+														theta_max)  
 
-	df_coulomb_lifetime_wiedermann = df_current_predefined.copy()
-	df_coulomb_lifetime_wiedermann['tag'] = 'coulomb_wiedermann'
-	df_coulomb_lifetime_wiedermann['value'] = coulomb_tau_hours  
-	print(df_coulomb_lifetime_wiedermann)
-
-	df_lifetime_zaycev = coulomb_scattering_zaycev(df_current_predefined, 
+	lifetime.zaycev = coulomb_scattering_zaycev(df_current_predefined, 
 												CONFIG.siberia2.RevolutionFrequency,
 												CONFIG.siberia2.beta, 
 												CONFIG.siberia2.P_Torr,
@@ -150,14 +142,20 @@ if __name__ == "__main__":
 												CONFIG.Z_avg, 
 												CONFIG.siberia2.Energy_GeV, 
 												theta_max)
+
+	# ################################################################################
+	lifetime.pascal = auto_filter(pascal_scattering(df_current_predefined))
+
 	# Визуализация
 	plot(
 		df_list=[df_current_predefined,
 				df_lifetime_predefined,
-				df_coulomb_lifetime_wiedermann,
-				df_lifetime_zaycev
+				lifetime.pascal
+				# ,
+				# df_coulomb_lifetime_wiedermann,
+				# df_lifetime_zaycev
 				],
-		output_image='./plots/coulomb_wiedermann_zaycev.png'
+		output_image='./plots/test.png'
 	)
 
 # 	# ################################################################################
