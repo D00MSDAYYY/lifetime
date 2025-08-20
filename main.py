@@ -8,7 +8,7 @@ import CONFIG
 
 from scattering.simple import simple_scattering
 from scattering.pascal_adapted import pascal_scattering
-from scattering.coulumb import coulomb_scattering_wiedermann, coulomb_scattering_zaycev, coulomb_scattering_chao
+from scattering.coulumb import coulomb_scattering_wiedermann, coulomb_scattering_chao
 from scattering.bremstahlung import bremstahlung_scattering_chao
 
 class _aux_Data:
@@ -122,29 +122,21 @@ if __name__ == "__main__":
 
 	# ################################################################################
 
-	theta_max = 1e-3  # Фиксированное малое значение для оценки
-	p_CGS = CONFIG.siberia2.gamma * CONFIG.siberia2.beta * CONFIG.CGS.e_mass * CONFIG.CGS.c
-	print("p_CGS", p_CGS)
-	lifetime.coulumb_wiedermann = df_current_predefined.copy()
-	lifetime.coulumb_wiedermann['tag'] = 'coulomb_wiedermann'
-	lifetime.coulumb_wiedermann['value'] = coulomb_scattering_wiedermann(
-														beta=CONFIG.siberia2.beta, 
-														P_Torr=CONFIG.siberia2.P_Torr, 
-														z=1,
-														Z=CONFIG.Z_avg,
-														p=p_CGS,
-														theta_max=theta_max)  
+	# theta_max = 1e-3  # Фиксированное малое значение для оценки
+	# p_CGS = CONFIG.siberia2.gamma * CONFIG.siberia2.beta * CONFIG.CGS.e_mass * CONFIG.CGS.c
 
-	# lifetime.coulumb_zaycev = coulomb_scattering_zaycev(df_current_predefined, 
-	# 											CONFIG.siberia2.RevolutionFrequency,
-	# 											CONFIG.siberia2.beta, 
-	# 											CONFIG.siberia2.P_Torr,
-	# 											1, 
-	# 											CONFIG.Z_avg, 
-	# 											CONFIG.siberia2.Energy_GeV, 
-	# 											theta_max)
+	# lifetime.coulumb_wiedermann = df_current_predefined.copy()
+	# lifetime.coulumb_wiedermann['tag'] = 'coulomb_wiedermann'
+	# lifetime.coulumb_wiedermann['value'] = coulomb_scattering_wiedermann(
+	# 													beta=CONFIG.siberia2.beta, 
+	# 													P_Torr=CONFIG.siberia2.P_Torr, 
+	# 													z=1,
+	# 													Z=CONFIG.Z_avg,
+	# 													p=p_CGS,
+	# 													theta_max=theta_max)
 
 	# ################################################################################
+
 	# lifetime.pascal = auto_filter(pascal_scattering(df_current_predefined), 600)
 
  	# ################################################################################
@@ -160,34 +152,33 @@ if __name__ == "__main__":
 	# 	gamma=CONFIG.siberia2.gamma
 	# ) 
 
-# 	# ################################################################################
+	# ################################################################################
 
-	# alpha, _, _ = CONFIG.constants.physical_constants['fine-structure constant']
-	# re, _, _ = CONFIG.constants.physical_constants['classical electron radius']
+	alpha, _, _ = CONFIG.constants.physical_constants['fine-structure constant']
+	re, _, _ = CONFIG.constants.physical_constants['classical electron radius']
 
-	# L_rad = math.log( 184.15 * CONFIG.Z_eff**( -1 / 3 ) )
+	L_rad = math.log( 184.15 * CONFIG.Z_eff**( -1 / 3 ) )
 
-	# a = alpha * CONFIG.Z_eff
+	a = alpha * CONFIG.Z_eff
 
-	# func_z = a**2 * ( ( 1 + a**2 )**(-1) + 0.20206 - 0.0369 * a**2 + 0.0083 * a**4 - 0.002 * a**6 )
+	func_z = a**2 * ( ( 1 + a**2 )**(-1) + 0.20206 - 0.0369 * a**2 + 0.0083 * a**4 - 0.002 * a**6 )
 	
-	# L_apostrophe_rad = math.log( 1194 * CONFIG.Z_eff**( -2 / 3 ) )
+	L_apostrophe_rad = math.log( 1194 * CONFIG.Z_eff**( -2 / 3 ) )
 
-	# tmp_braces = CONFIG.Z_eff**2 * ( L_rad - func_z ) + CONFIG.Z_eff * L_apostrophe_rad
+	tmp_braces = CONFIG.Z_eff**2 * ( L_rad - func_z ) + CONFIG.Z_eff * L_apostrophe_rad
 
-	# tmp_inv =  4 * alpha * re**2 * ( CONFIG.constants.Avogadro / CONFIG.A_avg ) * tmp_braces
+	tmp_inv =  4 * alpha * re**2 * ( CONFIG.constants.Avogadro / CONFIG.A_avg ) * tmp_braces
 
-	# X0 = 1 / tmp_inv
-	# print("X0", X0)
+	X0 = 1 / tmp_inv
 
-	# lifetime.brem_chao = df_current_predefined.copy()
-	# lifetime.brem_chao['tag'] = 'bremstahlung_chao'
-	# lifetime.brem_chao['value'] = bremstahlung_scattering_chao(beta=CONFIG.siberia2.beta,
-	# 															nZ=CONFIG.n_Z_avg,
-	# 															A=CONFIG.A_avg,
-	# 															X0=X0,
-	# 															dp_p_lim_acceptance=0.02  # от балды взял от дипсика
-	# 															)  
+	lifetime.brem_chao = df_current_predefined.copy()
+	lifetime.brem_chao['tag'] = 'bremstahlung_chao'
+	lifetime.brem_chao['value'] = bremstahlung_scattering_chao(beta=CONFIG.siberia2.beta,
+																nZ=CONFIG.n_Z_avg,
+																A=CONFIG.A_avg,
+																X0=X0,
+																dp_p_lim_acceptance=0.02  # от балды взял от дипсика
+																)  
 
 	# Визуализация
 	plot(
@@ -196,8 +187,8 @@ if __name__ == "__main__":
 				# lifetime.simple,
 				# lifetime.pascal,
 				# lifetime.coulumb_chao,
-				# lifetime.brem_chao,
-				lifetime.coulumb_wiedermann
+				lifetime.brem_chao
+				# lifetime.coulumb_wiedermann
 				],
 		output_image='./plots/all.png'
 	)
