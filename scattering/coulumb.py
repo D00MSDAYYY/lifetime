@@ -21,12 +21,13 @@ def coulomb_scattering_wiedermann(beta, P_Torr, z, Z, p, theta_max):
 
 	# Расчёт компонентов формулы
 	paren = (z * Z * CONFIG.CGS.e**2 / (2 * beta * CONFIG.CGS.c * p))**2
+	print("paren", paren)
 
 	tau_inv = CONFIG.CGS.c * beta * 2 * constants.Avogadro * P_Torr / 760 * ( paren ) * 4 * math.pi / (math.tan(theta_max / 2)**2)
 	
 	tau = 1 / tau_inv
 
-	tau_hours = tau / 3600  # Перевод в часы
+	tau_hours = tau  # Перевод в часы
 
 	return tau_hours
 

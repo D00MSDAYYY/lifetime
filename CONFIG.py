@@ -22,7 +22,6 @@ gases = {
 	}
 }
 
-z = constants.e
 Z_eff = math.sqrt(sum(gas["fraction"] * gas["Z"]**2 for gas in gases.values()))
 Z_avg = sum(gas["fraction"] * gas["Z"] for gas in gases.values())
 n_Z_avg = sum(gas["fraction"] * gas["n_Z"] for gas in gases.values())
@@ -30,16 +29,16 @@ A_avg = sum(gas["fraction"] * gas["mass"] for gas in gases.values())
 
 # система CGS
 class _aux_CGS:
-    pass
+	pass
 CGS = _aux_CGS()
 
-CGS.e = 4.803e-10 # Элементарный заряд [см³/²·г¹/²·с⁻¹] (статикулон)
-CGS.e_mass = 9.1094E-28 # граммы
-CGS.c = 2.998e10          # Скорость света [см/с]
+CGS.e = 4.803e-10			# Элементарный заряд [см³/²·г¹/²·с⁻¹] (статикулон)
+CGS.e_mass = 9.1094E-28 	# граммы
+CGS.c = 2.998e10			# Скорость света [см/с]
 
 # данные об ускорителе Сибирь-2
 class _aux_Siberia2:
-    pass
+	pass
 siberia2 = _aux_Siberia2()
 
 siberia2.beta = 1
