@@ -25,8 +25,8 @@ gases = {
 z = constants.e
 Z_eff = math.sqrt(sum(gas["fraction"] * gas["Z"]**2 for gas in gases.values()))
 Z_avg = sum(gas["fraction"] * gas["Z"] for gas in gases.values())
+n_Z_avg = sum(gas["fraction"] * gas["n_Z"] for gas in gases.values())
 A_avg = sum(gas["fraction"] * gas["mass"] for gas in gases.values())
-
 
 # система CGS
 class _aux_CGS:
@@ -51,6 +51,6 @@ siberia2.P_Pa = 1E-7
 siberia2.P_Torr = siberia2.P_Pa * ( 7.50062 * 1E-3 )
 siberia2.RevolutionFrequency = 2.4147E6
 siberia2.Energy_GeV = 2.3
-siberia2.gamma = siberia2.Energy_GeV / 0.000511
+siberia2.gamma = siberia2.Energy_GeV / 0.511e-3
 
 

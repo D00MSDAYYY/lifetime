@@ -147,24 +147,18 @@ if __name__ == "__main__":
 	# lifetime.pascal = auto_filter(pascal_scattering(df_current_predefined), 600)
 
  	# ################################################################################
-
-	# Предполагаемые параметры (замените на актуальные из CONSTANTS.siberia2)
-	beta = 1                          # v/c ≈ 1 для релятивистских электронов
-	nZ = 2                             # Для N₂ (азот, двухатомный газ)
-	Z = 7                              # Заряд ядра азота
-	A_acceptance_mm_mrad = CONFIG.siberia2.eA  
 	beta_func_value_m = 7  # Бета-функция [м]
 	gamma =  CONFIG.siberia2.Energy_GeV / 0.511e-3  # γ = E/mc² (для электронов 0.511 МэВ)
 
 	lifetime.coulumb_chao = df_current_predefined.copy()
 	lifetime.coulumb_chao['tag'] = 'coulumb_chao'
 	lifetime.coulumb_chao['value'] = coulomb_scattering_chao(
-		beta=beta,
-		nZ=nZ,
-		Z=Z,
-		A_acceptance=A_acceptance_mm_mrad,
-		beta_func_value=beta_func_value_m,
-		gamma=gamma
+		beta=CONFIG.siberia2.beta,
+		nZ=CONFIG.n_Z_avg,
+		Z=CONFIG.Z_avg,
+		A_acceptance=CONFIG.siberia2.eA,
+		beta_func_value=CONFIG.siberia2.AverageBetatronFunction,
+		gamma=CONFIG.siberia2.gamma
 	) 
 
 	# Визуализация

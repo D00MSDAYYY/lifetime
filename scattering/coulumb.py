@@ -68,6 +68,7 @@ def coulomb_scattering_zaycev(df_current, revolution_freq, beta, P_Torr, z, Z, p
 
 
 def coulomb_scattering_chao(beta, nZ, Z, A_acceptance, beta_func_value, gamma):
+	print(beta, nZ, Z, A_acceptance, beta_func_value, gamma)
 	"""
 	Вычисляет время жизни пучка из-за рассеяния на остаточном газе. стр 272 
 	
