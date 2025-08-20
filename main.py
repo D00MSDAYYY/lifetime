@@ -147,8 +147,6 @@ if __name__ == "__main__":
 	# lifetime.pascal = auto_filter(pascal_scattering(df_current_predefined), 600)
 
  	# ################################################################################
-	beta_func_value_m = 7  # Бета-функция [м]
-	gamma =  CONFIG.siberia2.Energy_GeV / 0.511e-3  # γ = E/mc² (для электронов 0.511 МэВ)
 
 	lifetime.coulumb_chao = df_current_predefined.copy()
 	lifetime.coulumb_chao['tag'] = 'coulumb_chao'
