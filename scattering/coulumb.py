@@ -85,7 +85,7 @@ def coulomb_scattering_chao(beta, nZ, Z, A_acceptance, beta_func_value, gamma):
 	re, _, _ = constants.physical_constants['classical electron radius']
 
 	sigma_el = 2 * math.pi * re**2 * Z**2 * beta_func_value / ( gamma**2 * A_acceptance )
-	tau = 1 / (ng * beta * constants.c * sigma_el) / 3600
+	tau = 1 / (ng * beta * constants.c * sigma_el) 
 
 	return tau
 

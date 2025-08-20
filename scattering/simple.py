@@ -28,7 +28,7 @@ def simple_scattering(df_current, revolution_freq):
 		df['tau'] = -df['delta_t'] / np.log(df['N'] / df['N'].shift(1))
 	
 	# Переводим секунды в часы и убираем выбросы
-	df['tag'] = "calculated_lifetime"
+	df['tag'] = "simple"
 	df['value'] = df['tau'] / 3600
 	df['value'] = df['value'].where(df['value'].between(0, 1000))  # Фильтр нереальных значений
 	

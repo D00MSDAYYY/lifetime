@@ -113,83 +113,71 @@ def auto_filter(df, window_size=None):
 if __name__ == "__main__":
 
 	df_current_predefined = auto_filter(df_from_file('./i5beam_5_days/beam_data_2025-07-02.csv'),50)
-	df_lifetime_predefined = auto_filter(df_from_file('./i5lifetime_5_days/beam_data_2025-07-02.csv'),50)
+	lifetime.predefined = auto_filter(df_from_file('./i5lifetime_5_days/beam_data_2025-07-02.csv'),50)
 
 	# ################################################################################
 
-	lifetime.simple = auto_filter(simple_scattering(df_current_predefined, 
-													CONFIG.siberia2.RevolutionFrequency), 300)
+	# lifetime.simple = auto_filter(simple_scattering(df_current_predefined, 
+	# 												CONFIG.siberia2.RevolutionFrequency), 600)
 
 	# ################################################################################
 
-	theta_max = 1e-3  # Фиксированное малое значение для оценки
-	p_CGS = CONFIG.siberia2.gamma * CONFIG.siberia2.beta * CONFIG.CGS.e_mass * 9.1094E-28
+	# theta_max = 1e-3  # Фиксированное малое значение для оценки
+	# p_CGS = CONFIG.siberia2.gamma * CONFIG.siberia2.beta * CONFIG.CGS.e_mass * 9.1094E-28
 
-	lifetime.wiedermann = df_current_predefined.copy()
-	lifetime.wiedermann['tag'] = 'coulomb_wiedermann'
-	lifetime.wiedermann['value'] = coulomb_scattering_wiedermann(CONFIG.siberia2.beta, 
-														CONFIG.siberia2.P_Torr, 
-														CONFIG.z,
-														CONFIG.Z_avg,
-														p_CGS,
-														theta_max)  
+	# lifetime.coulumb_wiedermann = df_current_predefined.copy()
+	# lifetime.coulumb_wiedermann['tag'] = 'coulomb_wiedermann'
+	# lifetime.coulumb_wiedermann['value'] = coulomb_scattering_wiedermann(CONFIG.siberia2.beta, 
+	# 													CONFIG.siberia2.P_Torr, 
+	# 													CONFIG.z,
+	# 													CONFIG.Z_avg,
+	# 													p_CGS,
+	# 													theta_max)  
 
-	lifetime.zaycev = coulomb_scattering_zaycev(df_current_predefined, 
-												CONFIG.siberia2.RevolutionFrequency,
-												CONFIG.siberia2.beta, 
-												CONFIG.siberia2.P_Torr,
-												1, 
-												CONFIG.Z_avg, 
-												CONFIG.siberia2.Energy_GeV, 
-												theta_max)
+	# lifetime.coulumb_zaycev = coulomb_scattering_zaycev(df_current_predefined, 
+	# 											CONFIG.siberia2.RevolutionFrequency,
+	# 											CONFIG.siberia2.beta, 
+	# 											CONFIG.siberia2.P_Torr,
+	# 											1, 
+	# 											CONFIG.Z_avg, 
+	# 											CONFIG.siberia2.Energy_GeV, 
+	# 											theta_max)
 
 	# ################################################################################
-	lifetime.pascal = auto_filter(pascal_scattering(df_current_predefined))
+	# lifetime.pascal = auto_filter(pascal_scattering(df_current_predefined), 600)
+
+ 	# ################################################################################
+
+	# Предполагаемые параметры (замените на актуальные из CONSTANTS.siberia2)
+	beta = 1                          # v/c ≈ 1 для релятивистских электронов
+	nZ = 2                             # Для N₂ (азот, двухатомный газ)
+	Z = 7                              # Заряд ядра азота
+	A_acceptance_mm_mrad = CONFIG.siberia2.eA  
+	beta_func_value_m = 7  # Бета-функция [м]
+	gamma =  CONFIG.siberia2.Energy_GeV / 0.511e-3  # γ = E/mc² (для электронов 0.511 МэВ)
+
+	lifetime.coulumb_chao = df_current_predefined.copy()
+	lifetime.coulumb_chao['tag'] = 'coulumb_chao'
+	lifetime.coulumb_chao['value'] = coulomb_scattering_chao(
+		beta=beta,
+		nZ=nZ,
+		Z=Z,
+		A_acceptance=A_acceptance_mm_mrad,
+		beta_func_value=beta_func_value_m,
+		gamma=gamma
+	) 
 
 	# Визуализация
 	plot(
 		df_list=[df_current_predefined,
-				df_lifetime_predefined,
-				lifetime.pascal
-				# ,
-				# df_coulomb_lifetime_wiedermann,
-				# df_lifetime_zaycev
+				lifetime.predefined,
+				# lifetime.simple,
+				# lifetime.pascal,
+				lifetime.coulumb_chao
 				],
-		output_image='./plots/test.png'
+		output_image='./plots/all.png'
 	)
 
-# 	# ################################################################################
-
-# 	# Предполагаемые параметры (замените на актуальные из CONSTANTS.siberia2)
-# 	beta = 1                          # v/c ≈ 1 для релятивистских электронов
-# 	nZ = 2                             # Для N₂ (азот, двухатомный газ)
-# 	Z = 7                              # Заряд ядра азота
-# 	A_acceptance_mm_mrad = CONSTANTS.siberia2.eA  
-# 	beta_func_value_m = 7  # Бета-функция [м]
-# 	gamma =  CONSTANTS.siberia2.Energy_GeV / 0.511e-3  # γ = E/mc² (для электронов 0.511 МэВ)
-
-# 	# Вызов функции
-# 	tau_hours = coulomb_scattering_chao(
-# 		beta=beta,
-# 		nZ=nZ,
-# 		Z=Z,
-# 		A_acceptance=A_acceptance_mm_mrad,
-# 		beta_func_value=beta_func_value_m,
-# 		gamma=gamma
-# 	)
-	
-# 	df_coulomb_chao_lifetime = df_current.copy()
-# 	df_coulomb_chao_lifetime['tag'] = 'coulumb_chao'
-# 	df_coulomb_chao_lifetime['value'] = tau_hours  # Просто постоянное значение для примера
-	
-# 	# plot(
-# 	# 	df_list=[df_current,
-# 	# 			df_predefined_lifetime,
-# 	# 			df_coulomb_wiedermann_lifetime,
-# 	# 			df_chao_lifetime
-# 	# 			],
-# 	# 	output_image='./plots/coulomb_scattering.png'
-# 	# )
 # 	# ################################################################################
 
 # 	alpha, _, _ = constants.physical_constants['fine-structure constant']
