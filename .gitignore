@@ -149,6 +149,5 @@ data/
 *.pkl
 
 # Output directories
-plots/
 output/
 results/
