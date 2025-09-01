@@ -27,6 +27,8 @@ Z_avg = sum(gas["fraction"] * gas["Z"] for gas in gases.values())
 n_Z_avg = sum(gas["fraction"] * gas["n_Z"] for gas in gases.values())
 A_avg = sum(gas["fraction"] * gas["mass"] for gas in gases.values())
 
+T_gas_K = 293 # температура газа в К
+
 # система CGS
 class _aux_CGS:
 	pass
