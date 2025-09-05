@@ -67,8 +67,7 @@ def split_data_by_time(input_file, output_dir, time_interval_seconds):
 
 # Примеры использования:
 
-# Разбить на интервалы по 300 секунд (5 минут)
-N = 60 * 60 * 1
-split_data_by_time('./beam_data/j5bm.csv', None, N)
+N = 60 * 60 * 24 
+split_data_by_time('./beam_data/i5beam.csv', None, N)
 split_data_by_time('./beam_data/i5lifetime.csv', None, N)
 

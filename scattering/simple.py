@@ -25,7 +25,14 @@ def simple_scattering(df_current, revolution_freq):
 	
 	# Расчет tau по формуле: N_curr = N_0 * exp(-Δt/τ)
 	with np.errstate(divide='ignore', invalid='ignore'):
-		df['tau'] = -df['delta_t'] / np.log(df['N'] / df['N'].shift(1))
+		ratio = df['value'] / df['value'].shift(1)
+		
+		# Используем np.where для векторизованного вычисления
+		df['tau'] = np.where(
+			(ratio < 0.1) | (ratio > 1.2) | pd.isna(ratio),
+			np.nan,
+			-df['delta_t'] / np.log(ratio)
+		)
 	
 	# Переводим секунды в часы и убираем выбросы
 	df['tag'] = "simple"

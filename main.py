@@ -112,13 +112,17 @@ def auto_filter(df, window_size=None):
 
 if __name__ == "__main__":
 
-	df_current_predefined = auto_filter(df_from_file('./j5bm_split/beam_data_2025-06-30_16-00-00_to_17-00-00.csv'),50)
-	lifetime.predefined = auto_filter(df_from_file('./i5lifetime_split/beam_data_2025-06-30_16-00-00_to_17-00-00.csv'),50)
+	df_current_predefined = auto_filter(df_from_file('./i5beam_split/beam_data_2025-06-30_00-00-00_to_00-00-00.csv'),50)
+	lifetime.predefined = auto_filter(df_from_file('./i5lifetime_split/beam_data_2025-06-30_00-00-00_to_00-00-00.csv'),50)
 
 	# ################################################################################
 
 	lifetime.simple = auto_filter(simple_scattering(df_current_predefined, 
-													CONFIG.siberia2.RevolutionFrequency), 600)
+													CONFIG.siberia2.RevolutionFrequency), 500)
+	
+	# ################################################################################
+
+	lifetime.pascal = auto_filter(pascal_scattering(df_current_predefined),500)
 
 	# ################################################################################
 
@@ -138,15 +142,10 @@ if __name__ == "__main__":
 	# ################################################################################
 
 	lifetime.brem_wiedermann = df_current_predefined.copy()
-	lifetime.brem_wiedermann['tag'] = 'brem_wiedermann'
+	lifetime.brem_wiedermann['tag'] = 'bremstahlung_wiedermann'
 	lifetime.brem_wiedermann['value'] = bremsstahlung_scattering_wiedermann(
 														P_Torr=CONFIG.siberia2.P_Torr,
 														energy_acceptance=0.02)
-
-	# ################################################################################
-
-	lifetime.pascal = pascal_scattering(df_current_predefined)
-
 
  	# ################################################################################
 
@@ -183,7 +182,7 @@ if __name__ == "__main__":
 	X0 = 1 / tmp_inv / 100000 # перевожу к размерности г см
 
 	lifetime.brem_chao = df_current_predefined.copy()
-	lifetime.brem_chao['tag'] = 'bremsstahlung_chao'
+	lifetime.brem_chao['tag'] = 'bremstahlung_chao'
 	lifetime.brem_chao['value'] = bremstahlung_scattering_chao(beta=CONFIG.siberia2.beta,
 																nZ=CONFIG.n_Z_avg,
 																A=CONFIG.A_avg,

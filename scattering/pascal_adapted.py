@@ -70,7 +70,7 @@ def pascal_scattering(df_current):
     for index, row in df_current.iterrows():
         tau = __pascal_scattering(row["value"])
 
-        if tau is not None:
+        if tau is not None and tau < 10 * 3600:
             tau = tau / 3600
             results.append({
                 'timestamp': row['timestamp'],
@@ -78,6 +78,6 @@ def pascal_scattering(df_current):
             })
 
     df_result = pd.DataFrame(results)
-    df_result['tag'] = 'pasc'
+    df_result['tag'] = 'pascal_adapted'
 
     return df_result
