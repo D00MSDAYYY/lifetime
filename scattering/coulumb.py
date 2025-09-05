@@ -1,9 +1,9 @@
 import math
 import CONFIG
-
+import numpy as np
 from scipy import constants
 
-def coulomb_scattering_wiedermann(beta, P_Torr, z, Z, p, theta_max):
+def coulomb_scattering_wiedemann(beta, P_Torr, z, Z, p, theta_max):
 	"""
 	Вычисляет время жизни пучка из-за рассеяния на остаточном газе в системе CGS.
 
@@ -20,15 +20,41 @@ def coulomb_scattering_wiedermann(beta, P_Torr, z, Z, p, theta_max):
 	Возвращает:
 	tau_hours : время жизни [часы]
 	"""
-
 	# Расчёт компонентов формулы
-	paren = (z * Z * CONFIG.CGS.e**2 / (2 * beta * CONFIG.CGS.c * p))**2
+	# print("beta", beta)
+	# print("P_Torr",P_Torr)
+	# print("z",z)
+	# print("Z",Z)
+	# print("p", p)
+	# print("theta_max",theta_max)
+	# print("CONFIG.CGS.c",CONFIG.CGS.c)
+
+	paren = (z * Z * CONFIG.CGS.e**2 / (2 * beta  * CONFIG.CGS.c * p))**2
 
 	tau_inv = CONFIG.CGS.c * beta * 2 * constants.Avogadro * P_Torr / 760 * ( paren ) * 4 * math.pi / (math.tan(theta_max / 2)**2)
 	
 	tau = 1 / tau_inv
 
-	tau_hours = tau  # Перевод в часы ?
+	tau_hours = tau  / 3600
+
+	return tau_hours
+
+def coulomb_scattering_wiedemann2(p_CGS, eA, b_m, P_nTorr):
+	"""
+	Вычисляет время жизни пучка из-за рассеяния на остаточном газе в системе CGS.
+
+	particle_accelerator_physics_3ed_wiedemann.pdf стр 323
+
+	Возвращает:
+	tau_hours : время жизни [часы]
+	"""
+
+	# print("p_CGS", p_CGS)
+	# print("eA", eA)
+	# print("b_m", b_m)
+	# print("P_nTorr", P_nTorr)
+
+	tau_hours = 10.25 * ( p_CGS**2 * eA ) / ( b_m * P_nTorr )
 
 	return tau_hours
 
@@ -40,14 +66,38 @@ def coulomb_scattering_chao(beta, nZ, Z, A_acceptance, beta_func_value, gamma, P
 	Возвращает:
 	tau : время жизни [часы]
 	"""
+	print("beta",beta)
+	print("nZ",nZ)
+	print("Z",Z)
+	print("A_acceptance",A_acceptance)
+	print("beta_func_value",beta_func_value)
+	print("gamma",gamma)
+	print("P_Torr",P_Torr)
+	print("T_K",T_K)
+
 	ng = 9.656E24 * nZ * P_Torr / T_K
 
-	re, _, _ = constants.physical_constants['classical electron radius']
+	r_e, _, _ = constants.physical_constants['classical electron radius']
 
-	sigma_el = 2 * math.pi * re**2 * Z**2 * beta_func_value / ( gamma**2 * A_acceptance )
+	sigma_el = 2 * math.pi * r_e**2 * Z**2 * beta_func_value / ( gamma**2 * A_acceptance )
 
-	tau = 1 / (ng * beta * constants.c * sigma_el) 
+	inv = ng * beta * constants.c * sigma_el
+
+	tau = 1 / inv / 3600
 
 	return tau
 
+
+def coulomb_e(gamma, Z, beta_x, beta_y, beta_avg, A_x, A_y, P):
+	r_e, _, _ = CONFIG.constants.physical_constants['classical electron radius']
+
+	n_A = 7.07e22
+
+	paren = beta_avg * beta_x / A_x**2 + beta_avg * beta_y / A_y**2
+
+	inv = 2 * np.pi * ( r_e / gamma )**2 * Z * ( Z + 1 ) * CONFIG.constants.c * n_A * P * paren
+
+	tau = 1 / inv / 3600
+
+	return tau
 

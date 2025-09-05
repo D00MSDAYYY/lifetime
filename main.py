@@ -8,8 +8,8 @@ import CONFIG
 
 from scattering.simple import simple_scattering
 from scattering.pascal_adapted import pascal_scattering
-from scattering.coulumb import coulomb_scattering_wiedermann, coulomb_scattering_chao
-from scattering.bremsstahlung import bremsstahlung_scattering_wiedermann, bremstahlung_scattering_chao
+from scattering.coulumb import coulomb_scattering_wiedemann, coulomb_scattering_wiedemann2, coulomb_scattering_chao, coulomb_e
+from scattering.bremsstahlung import bremsstahlung_scattering_wiedemann, bremstahlung_scattering_chao
 
 class _aux_Data:
     pass
@@ -41,6 +41,8 @@ def df_from_file(file_path):
 		df['value'].astype(str).str.strip().str.replace(',', '.'),
 		errors='coerce'
 	)
+	df['value'] = df['value'].where(df['value'] >= 0, 0)
+
 	
 	df.dropna(subset=['timestamp', 'value'], inplace=True)
 	return df
@@ -112,38 +114,46 @@ def auto_filter(df, window_size=None):
 
 if __name__ == "__main__":
 
-	df_current_predefined = auto_filter(df_from_file('./i5beam_split/beam_data_2025-06-30_00-00-00_to_00-00-00.csv'),50)
-	lifetime.predefined = auto_filter(df_from_file('./i5lifetime_split/beam_data_2025-06-30_00-00-00_to_00-00-00.csv'),50)
+	df_current_predefined = df_from_file('./i5beam_split/beam_data_2025-06-30_00-00-00_to_00-00-00.csv')
+	lifetime.predefined = df_from_file('./i5lifetime_split/beam_data_2025-06-30_00-00-00_to_00-00-00.csv')
 
 	# ################################################################################
 
-	lifetime.simple = auto_filter(simple_scattering(df_current_predefined, 
-													CONFIG.siberia2.RevolutionFrequency), 500)
+	lifetime.simple = simple_scattering(df_current_predefined, 
+													CONFIG.siberia2.RevolutionFrequency)
 	
 	# ################################################################################
 
-	lifetime.pascal = auto_filter(pascal_scattering(df_current_predefined),500)
+	lifetime.pascal = auto_filter(pascal_scattering(df_current_predefined), 400)
 
 	# ################################################################################
 
-	theta_max = 1e-3  # Фиксированное малое значение для оценки
+	theta_max = 1e-2  # Фиксированное малое значение для оценки
 	p_CGS = CONFIG.siberia2.gamma * CONFIG.siberia2.beta * CONFIG.CGS.e_mass * CONFIG.CGS.c
-
-	lifetime.coulumb_wiedermann = df_current_predefined.copy()
-	lifetime.coulumb_wiedermann['tag'] = 'coulomb_wiedermann'
-	lifetime.coulumb_wiedermann['value'] = coulomb_scattering_wiedermann(
+	lifetime.coulumb_wiedemann = df_current_predefined.copy()
+	lifetime.coulumb_wiedemann['tag'] = 'coulomb_wiedemann'
+	lifetime.coulumb_wiedemann['value'] = coulomb_scattering_wiedemann(
 														beta=CONFIG.siberia2.beta, 
 														P_Torr=CONFIG.siberia2.P_Torr, 
 														z=1,
 														Z=CONFIG.Z_avg,
 														p=p_CGS,
 														theta_max=theta_max)
-	
+
 	# ################################################################################
 
-	lifetime.brem_wiedermann = df_current_predefined.copy()
-	lifetime.brem_wiedermann['tag'] = 'bremstahlung_wiedermann'
-	lifetime.brem_wiedermann['value'] = bremsstahlung_scattering_wiedermann(
+	lifetime.coulumb_wiedemann2 = df_current_predefined.copy()
+	lifetime.coulumb_wiedemann2['tag'] = 'coulomb_wiedemann2'
+	lifetime.coulumb_wiedemann2['value'] = coulomb_scattering_wiedemann2( 2.5,
+																	  CONFIG.siberia2.eA,
+																	  CONFIG.siberia2.AverageBetatronFunction,
+																	  CONFIG.siberia2.P_Torr * 1e9 )
+
+	# ################################################################################
+
+	lifetime.brem_wiedemann = df_current_predefined.copy()
+	lifetime.brem_wiedemann['tag'] = 'bremstahlung_wiedemann'
+	lifetime.brem_wiedemann['value'] = bremsstahlung_scattering_wiedemann(
 														P_Torr=CONFIG.siberia2.P_Torr,
 														energy_acceptance=0.02)
 
@@ -155,7 +165,7 @@ if __name__ == "__main__":
 		beta=CONFIG.siberia2.beta,
 		nZ=CONFIG.n_Z_avg,
 		Z=CONFIG.Z_avg,
-		A_acceptance=CONFIG.siberia2.eA,
+		A_acceptance=(10e-3**2 / CONFIG.siberia2.AverageBetatronFunction),
 		beta_func_value=CONFIG.siberia2.AverageBetatronFunction,
 		gamma=CONFIG.siberia2.gamma,
 		P_Torr=CONFIG.siberia2.P_Torr,
@@ -181,29 +191,43 @@ if __name__ == "__main__":
 
 	X0 = 1 / tmp_inv / 100000 # перевожу к размерности г см
 
-	lifetime.brem_chao = df_current_predefined.copy()
-	lifetime.brem_chao['tag'] = 'bremstahlung_chao'
-	lifetime.brem_chao['value'] = bremstahlung_scattering_chao(beta=CONFIG.siberia2.beta,
-																nZ=CONFIG.n_Z_avg,
-																A=CONFIG.A_avg,
-																X0=X0,
-																dp_p_lim_acceptance=0.02,  # от балды взял от дипсика
-																P_Torr=CONFIG.siberia2.P_Torr,
-																T_K=CONFIG.T_gas_K
-																)  
+	# lifetime.brem_chao = df_current_predefined.copy()
+	# lifetime.brem_chao['tag'] = 'bremstahlung_chao'
+	# lifetime.brem_chao['value'] = bremstahlung_scattering_chao(beta=CONFIG.siberia2.beta,
+	# 															nZ=CONFIG.n_Z_avg,
+	# 															A=10e-3,
+	# 															X0=X0,
+	# 															dp_p_lim_acceptance=0.02,  # от балды взял от дипсика
+	# 															P_Torr=CONFIG.siberia2.P_Torr,
+	# 															T_K=CONFIG.T_gas_K
+	# 															)  
 
 	# ################################################################################
+
+	tau_e = coulomb_e(CONFIG.siberia2.gamma,
+				   7,
+				   CONFIG.siberia2.AverageBetatronXFunction,
+				   CONFIG.siberia2.AverageBetatronYFunction,
+				   CONFIG.siberia2.AverageBetatronFunction,
+				   CONFIG.siberia2.HorizontalAperture,
+				   CONFIG.siberia2.VerticalAperture,
+				   CONFIG.siberia2.P_Torr)
+	
+	# ################################################################################
+
 
 	plot(
 		df_list=[
 			df_current_predefined,
 			lifetime.predefined,
-			lifetime.simple,
-			lifetime.pascal,
-			lifetime.coulumb_wiedermann,
-			lifetime.coulumb_chao,
-			lifetime.brem_wiedermann,
-			lifetime.brem_chao
+			# lifetime.simple,
+			# lifetime.pascal
+			# ,
+			# lifetime.coulumb_wiedemann,
+			# lifetime.coulumb_wiedemann2,
+			lifetime.coulumb_chao
+			# lifetime.brem_wiedemann,
+			# lifetime.brem_chao
 			],
 		output_image='./plots/all.png'
 	)

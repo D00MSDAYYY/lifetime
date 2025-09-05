@@ -71,7 +71,7 @@ def pascal_scattering(df_current):
         tau = __pascal_scattering(row["value"])
 
         if tau is not None and tau < 10 * 3600:
-            tau = tau / 3600
+            tau = tau / 3600 / 2 # почему-то значения в 2 раза больше получались
             results.append({
                 'timestamp': row['timestamp'],
                 'value': tau
