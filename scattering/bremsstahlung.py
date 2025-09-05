@@ -18,8 +18,6 @@ def bremsstahlung_scattering_wiedermann(P_Torr, energy_acceptance):
 	return tau
 
 
-	
-
 def bremstahlung_scattering_chao(beta, nZ,  A, X0, dp_p_lim_acceptance, P_Torr, T_K):
 	"""
 	

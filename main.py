@@ -112,13 +112,13 @@ def auto_filter(df, window_size=None):
 
 if __name__ == "__main__":
 
-	df_current_predefined = auto_filter(df_from_file('./i5beam_5_days/beam_data_2025-07-02.csv'),50)
-	lifetime.predefined = auto_filter(df_from_file('./i5lifetime_5_days/beam_data_2025-07-02.csv'),50)
+	df_current_predefined = auto_filter(df_from_file('./j5bm_split/beam_data_2025-06-30_16-00-00_to_17-00-00.csv'),50)
+	lifetime.predefined = auto_filter(df_from_file('./i5lifetime_split/beam_data_2025-06-30_16-00-00_to_17-00-00.csv'),50)
 
 	# ################################################################################
 
-	# lifetime.simple = auto_filter(simple_scattering(df_current_predefined, 
-	# 												CONFIG.siberia2.RevolutionFrequency), 600)
+	lifetime.simple = auto_filter(simple_scattering(df_current_predefined, 
+													CONFIG.siberia2.RevolutionFrequency), 600)
 
 	# ################################################################################
 
@@ -145,7 +145,8 @@ if __name__ == "__main__":
 
 	# ################################################################################
 
-	# lifetime.pascal = auto_filter(pascal_scattering(df_current_predefined), 600)
+	lifetime.pascal = pascal_scattering(df_current_predefined)
+
 
  	# ################################################################################
 
@@ -198,8 +199,8 @@ if __name__ == "__main__":
 		df_list=[
 			df_current_predefined,
 			lifetime.predefined,
-			# lifetime.simple,
-			# lifetime.pascal,
+			lifetime.simple,
+			lifetime.pascal,
 			lifetime.coulumb_wiedermann,
 			lifetime.coulumb_chao,
 			lifetime.brem_wiedermann,
