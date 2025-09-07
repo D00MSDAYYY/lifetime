@@ -1,7 +1,7 @@
 import math
 from scipy import constants
 
-def bremsstahlung_scattering_wiedemann(P_Torr, energy_acceptance):
+def bremstahlung_scattering_wiedemann(P_Torr, energy_acceptance):
 	"""
 	
 	particle_accelerator_physics_3ed_wiedemann.pdf стр 328

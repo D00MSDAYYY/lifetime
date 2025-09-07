@@ -9,7 +9,7 @@ import CONFIG
 from scattering.simple import simple_scattering
 from scattering.pascal_adapted import pascal_scattering
 from scattering.coulumb import coulomb_scattering_wiedemann, coulomb_scattering_wiedemann2, coulomb_scattering_chao, coulomb_e
-from scattering.bremsstahlung import bremsstahlung_scattering_wiedemann, bremstahlung_scattering_chao
+from scattering.bremsstahlung import bremstahlung_scattering_wiedemann, bremstahlung_scattering_chao
 
 class _aux_Data:
     pass
@@ -114,8 +114,8 @@ def auto_filter(df, window_size=None):
 
 if __name__ == "__main__":
 
-	df_current_predefined = df_from_file('./i5beam_split/beam_data_2025-06-30_00-00-00_to_00-00-00.csv')
-	lifetime.predefined = df_from_file('./i5lifetime_split/beam_data_2025-06-30_00-00-00_to_00-00-00.csv')
+	df_current_predefined = auto_filter(df_from_file('./i5beam_split/beam_data_2025-06-30_00-00-00_to_00-00-00.csv'),50)
+	lifetime.predefined = auto_filter(df_from_file('./i5lifetime_split/beam_data_2025-06-30_00-00-00_to_00-00-00.csv'),50)
 
 	# ################################################################################
 
@@ -145,7 +145,7 @@ if __name__ == "__main__":
 	lifetime.coulumb_wiedemann2 = df_current_predefined.copy()
 	lifetime.coulumb_wiedemann2['tag'] = 'coulomb_wiedemann2'
 	lifetime.coulumb_wiedemann2['value'] = coulomb_scattering_wiedemann2( 2.5,
-																	  CONFIG.siberia2.eA,
+																	  CONFIG.siberia2.eA_mm_mrad,
 																	  CONFIG.siberia2.AverageBetatronFunction,
 																	  CONFIG.siberia2.P_Torr * 1e9 )
 
@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
 	lifetime.brem_wiedemann = df_current_predefined.copy()
 	lifetime.brem_wiedemann['tag'] = 'bremstahlung_wiedemann'
-	lifetime.brem_wiedemann['value'] = bremsstahlung_scattering_wiedemann(
+	lifetime.brem_wiedemann['value'] = bremstahlung_scattering_wiedemann(
 														P_Torr=CONFIG.siberia2.P_Torr,
 														energy_acceptance=0.02)
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
 		beta=CONFIG.siberia2.beta,
 		nZ=CONFIG.n_Z_avg,
 		Z=CONFIG.Z_avg,
-		A_acceptance=(10e-3**2 / CONFIG.siberia2.AverageBetatronFunction),
+		A_acceptance=CONFIG.siberia2.eA,
 		beta_func_value=CONFIG.siberia2.AverageBetatronFunction,
 		gamma=CONFIG.siberia2.gamma,
 		P_Torr=CONFIG.siberia2.P_Torr,
@@ -224,7 +224,7 @@ if __name__ == "__main__":
 			# lifetime.pascal
 			# ,
 			# lifetime.coulumb_wiedemann,
-			# lifetime.coulumb_wiedemann2,
+			lifetime.coulumb_wiedemann2,
 			lifetime.coulumb_chao
 			# lifetime.brem_wiedemann,
 			# lifetime.brem_chao
