@@ -51,7 +51,7 @@ def analyze_beam_current_dft(df, sampling_rate):
     half_n = n // 2
     frequencies_half = frequencies[:half_n]
     magnitude = np.abs(dft_result[:half_n]) / n
-    magnitude = moving_average(magnitude, 40)
+    # magnitude = moving_average(magnitude, 40)
     magnitude_db = 20 * np.log10(magnitude + 1e-10)  # В дБ для лучшей видимости
     
     # Создаем figure с subplots
@@ -151,7 +151,7 @@ def main(csv_file_path):
 
 if __name__ == "__main__":
 
-    csv_file_path = "../data/beam/misc/2025-06-30.csv"  
+    csv_file_path = "../data/beam/misc/2025-07-03.csv"  
     
     try:
         main(csv_file_path)
