@@ -1,5 +1,5 @@
 import math
-import CONFIG
+import CONSTANTS_CONFIG
 import numpy as np
 from scipy import constants
 
@@ -29,9 +29,9 @@ def coulomb_scattering_wiedemann(beta, P_Torr, z, Z, p, theta_max):
 	# print("theta_max",theta_max)
 	# print("CONFIG.CGS.c",CONFIG.CGS.c)
 
-	paren = (z * Z * CONFIG.CGS.e**2 / (2 * beta  * CONFIG.CGS.c * p))**2
+	paren = (z * Z * CONSTANTS_CONFIG.CGS.e**2 / (2 * beta  * CONSTANTS_CONFIG.CGS.c * p))**2
 
-	tau_inv = CONFIG.CGS.c * beta * 2 * constants.Avogadro * P_Torr / 760 * ( paren ) * 4 * math.pi / (math.tan(theta_max / 2)**2)
+	tau_inv = CONSTANTS_CONFIG.CGS.c * beta * 2 * constants.Avogadro * P_Torr / 760 * ( paren ) * 4 * math.pi / (math.tan(theta_max / 2)**2)
 	
 	tau = 1 / tau_inv
 
@@ -89,13 +89,13 @@ def coulomb_scattering_chao(beta, nZ, Z, A_acceptance, beta_func_value, gamma, P
 
 
 def coulomb_e(gamma, Z, beta_x, beta_y, beta_avg, A_x, A_y, P):
-	r_e, _, _ = CONFIG.constants.physical_constants['classical electron radius']
+	r_e, _, _ = CONSTANTS_CONFIG.constants.physical_constants['classical electron radius']
 
 	n_A = 7.07e22
 
 	paren = beta_avg * beta_x / A_x**2 + beta_avg * beta_y / A_y**2
 
-	inv = 2 * np.pi * ( r_e / gamma )**2 * Z * ( Z + 1 ) * CONFIG.constants.c * n_A * P * paren
+	inv = 2 * np.pi * ( r_e / gamma )**2 * Z * ( Z + 1 ) * CONSTANTS_CONFIG.constants.c * n_A * P * paren
 
 	tau = 1 / inv / 3600
 
