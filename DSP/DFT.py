@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
 import pandas as pd
-from filtering.moving_average import moving_average
+
+from filtering.kalman_filter import kalman_filter_exp_decay
 
 def load_beam_current_data(csv_file_path):
     """
@@ -51,8 +52,10 @@ def analyze_beam_current_dft(df, sampling_rate):
     half_n = n // 2
     frequencies_half = frequencies[:half_n]
     magnitude = np.abs(dft_result[:half_n]) / n
-    # magnitude = moving_average(magnitude, 40)
-    magnitude_db = 20 * np.log10(magnitude + 1e-10)  # В дБ для лучшей видимости
+    # magnitude_filtered = moving_average(magnitude, 40) kalman_filter_exp_decay
+    magnitude_filtered = kalman_filter_exp_decay(magnitude)
+    magnitude_filtered_db = 20 * np.log10(magnitude_filtered + 1e-10)  # В дБ для лучшей видимости
+    magnitude_db = 20 * np.log10(magnitude + 1e-10)  
     
     # Создаем figure с subplots
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 10))
@@ -80,7 +83,8 @@ def analyze_beam_current_dft(df, sampling_rate):
     ax3.set_xlim(0, min(1, frequencies_half[-1]))  # Ограничиваем для видимости
     
     # 4. Амплитудный спектр (логарифмическая шкала - дБ)
-    ax4.plot(frequencies_half, magnitude_db, 'm-', linewidth=1)
+    ax4.plot(frequencies_half, magnitude_db, 'm-', linewidth=1, alpha=0.7)
+    ax4.plot(frequencies_half, magnitude_filtered_db, 'g-', linewidth=1)
     ax4.set_xlabel('Частота (Гц)')
     ax4.set_ylabel('Амплитуда (дБ)')
     ax4.set_title('Амплитудный спектр (DFT) - Логарифмическая шкала')

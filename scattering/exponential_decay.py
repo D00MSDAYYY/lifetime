@@ -4,7 +4,7 @@ import numpy as np
 from scipy import constants
 
 
-def esponential_decay_scattering(df_current, revolution_freq):
+def exponential_decay_scattering(df_current, revolution_freq):
 	"""
 	Расчет времени жизни пучка через экспоненциальный распад
 	с учетом миллисекундного разрешения временных меток
