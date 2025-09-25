@@ -155,7 +155,7 @@ def main(csv_file_path):
 
 if __name__ == "__main__":
 
-    csv_file_path = "../data/beam/misc/2025-07-03.csv"  
+    csv_file_path = "../data/beam/misc/2025-06-30.csv"  
     
     try:
         main(csv_file_path)

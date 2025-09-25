@@ -3,7 +3,7 @@ import CONSTANTS_CONFIG
 import numpy as np
 from scipy import constants
 
-def coulomb_scattering_wiedemann(beta, P_Torr, z, Z, p, theta_max):
+def elactic_scattering_wiedemann(beta, P_Torr, z, Z, p, theta_max):
 	"""
 	Вычисляет время жизни пучка из-за рассеяния на остаточном газе в системе CGS.
 
@@ -27,7 +27,7 @@ def coulomb_scattering_wiedemann(beta, P_Torr, z, Z, p, theta_max):
 	# print("Z",Z)
 	# print("p", p)
 	# print("theta_max",theta_max)
-	# print("CONFIG.CGS.c",CONFIG.CGS.c)
+	# print("CONSTANTS_CONFIG.CGS.c",CONSTANTS_CONFIG.CGS.c)
 
 	paren = (z * Z * CONSTANTS_CONFIG.CGS.e**2 / (2 * beta  * CONSTANTS_CONFIG.CGS.c * p))**2
 
@@ -39,7 +39,7 @@ def coulomb_scattering_wiedemann(beta, P_Torr, z, Z, p, theta_max):
 
 	return tau_hours
 
-def coulomb_scattering_wiedemann2(p_CGS, eA, b_m, P_nTorr):
+def elactic_scattering_wiedemann2(p_CGS, eA, b_m, P_nTorr):
 	"""
 	Вычисляет время жизни пучка из-за рассеяния на остаточном газе в системе CGS.
 
@@ -58,7 +58,7 @@ def coulomb_scattering_wiedemann2(p_CGS, eA, b_m, P_nTorr):
 
 	return tau_hours
 
-def coulomb_scattering_chao(beta, nZ, Z, A_acceptance, beta_func_value, gamma, P_Torr, T_K):
+def elactic_scattering_chao(beta, nZ, Z, A_acceptance, beta_func_value, gamma, P_Torr, T_K):
 	"""
 
 	handbook_of_accelerator_physics_and_engineering_2ed_chao.pdf стр 272
@@ -88,7 +88,7 @@ def coulomb_scattering_chao(beta, nZ, Z, A_acceptance, beta_func_value, gamma, P
 	return tau
 
 
-def coulomb_e(gamma, Z, beta_x, beta_y, beta_avg, A_x, A_y, P):
+def elactic_e(gamma, Z, beta_x, beta_y, beta_avg, A_x, A_y, P):
 	r_e, _, _ = CONSTANTS_CONFIG.constants.physical_constants['classical electron radius']
 
 	n_A = 7.07e22

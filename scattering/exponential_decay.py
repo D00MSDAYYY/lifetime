@@ -1,8 +1,6 @@
-import math
 import pandas as pd
 import numpy as np
 from scipy import constants
-
 
 def exponential_decay_scattering(df_current, revolution_freq):
 	"""

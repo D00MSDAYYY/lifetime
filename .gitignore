@@ -54,7 +54,7 @@ coverage.xml
 
 # IPython
 profile_default/
-ipython_config.py
+ipython_CONSTANTS_CONFIG.py
 
 # pyenv
 .python-version
