@@ -38,7 +38,6 @@ siberia2.AverageBetatronFunction = ( siberia2.AverageBetatronXFunction + siberia
 siberia2.HorizontalAperture = 20e-3 
 siberia2.VerticalAperture = 12e-3 
 siberia2.eA = 10e-3**2 / siberia2.AverageBetatronFunction 
-print("eA = ", siberia2.eA)
 siberia2.eA_mm_mrad = 10 # check this
 siberia2.P_Pa = 1E-7
 siberia2.P_Torr = siberia2.P_Pa * ( 7.50062 * 1E-3 )
@@ -46,24 +45,6 @@ siberia2.RevolutionFrequency = 2.4147E6
 siberia2.Energy_GeV = 2.5
 siberia2.gamma = siberia2.Energy_GeV / 0.511e-3
 
-
-
-# # данные об ускорителе Сибирь-2
-# class _aux_Siberia2:
-#     pass
-# siberia2 = _aux_Siberia2()
-
-# siberia2.beta = 1
-# siberia2.AverageBetatronXFunction = 10
-# siberia2.AverageBetatronYFunction = 5
-# siberia2.AverageBetatronFunction = ( siberia2.AverageBetatronXFunction + siberia2.AverageBetatronYFunction ) / 2
-# siberia2.eA = 50 # beam chamber radius
-# siberia2.eA_mm_mrad = 10 # check this
-# siberia2.P_Pa = 1E-7
-# siberia2.P_Torr = siberia2.P_Pa * ( 7.50062 * 1E-3 )
-# siberia2.RevolutionFrequency = 2.4147E6
-# siberia2.Energy_GeV = 2.3
-# siberia2.gamma = siberia2.Energy_GeV / 0.511e-3
 
 
 

@@ -141,7 +141,6 @@ venv/
 ENV/
 
 # Project specific
-data/
 *.csv
 *.xlsx
 *.json

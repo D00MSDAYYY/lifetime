@@ -1,7 +1,7 @@
 import math
 from scipy import constants
 
-def bremstahlung_scattering_wiedemann(P_Torr, energy_acceptance):
+def bremhsstrahlung_scattering_wiedemann(P_Torr, energy_acceptance):
 	"""
 	
 	particle_accelerator_physics_3ed_wiedemann.pdf стр 328
@@ -18,7 +18,7 @@ def bremstahlung_scattering_wiedemann(P_Torr, energy_acceptance):
 	return tau
 
 
-def bremstahlung_scattering_chao(beta, nZ,  A, X0, dp_p_lim_acceptance, P_Torr, T_K):
+def bremhsstrahlung_scattering_chao(beta, nZ,  A, X0, dp_p_lim_acceptance, P_Torr, T_K):
 	"""
 	
 	handbook_of_accelerator_physics_and_engineering_2ed_chao.pdf стр 272

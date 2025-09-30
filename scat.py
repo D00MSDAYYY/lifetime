@@ -5,8 +5,8 @@ import CONSTANTS_CONFIG
 
 from scattering.exponential_decay import exponential_decay_scattering
 from scattering.pascal_adapted import pascal_scattering
-from scattering.elastic import elactic_scattering_wiedemann, elactic_scattering_wiedemann2, elactic_scattering_chao, elactic_e
-from scattering.bremstahlung import bremstahlung_scattering_wiedemann, bremstahlung_scattering_chao
+from scattering.elastic import elastic_scattering_wiedemann, elastic_scattering_wiedemann2, elastic_scattering_chao
+from scattering.bremhsstrahlung import bremhsstrahlung_scattering_wiedemann, bremhsstrahlung_scattering_chao
 
 class _aux_Data:
     pass
@@ -127,9 +127,9 @@ if __name__ == "__main__":
 
 	theta_max = 1e-2  # Фиксированное малое значение для оценки
 	p_CGS = CONSTANTS_CONFIG.siberia2.gamma * CONSTANTS_CONFIG.siberia2.beta * CONSTANTS_CONFIG.CGS.e_mass * CONSTANTS_CONFIG.CGS.c
-	lifetime.elactic_wiedemann = df_current_predefined.copy()
-	lifetime.elactic_wiedemann['tag'] = 'elactic_wiedemann'
-	lifetime.elactic_wiedemann['value'] = elactic_scattering_wiedemann(
+	lifetime.elastic_wiedemann = df_current_predefined.copy()
+	lifetime.elastic_wiedemann['tag'] = 'elastic_wiedemann'
+	lifetime.elastic_wiedemann['value'] = elastic_scattering_wiedemann(
 														beta=CONSTANTS_CONFIG.siberia2.beta, 
 														P_Torr=CONSTANTS_CONFIG.siberia2.P_Torr, 
 														z=1,
@@ -139,35 +139,35 @@ if __name__ == "__main__":
 
 	# ################################################################################
 
-	# lifetime.elactic_wiedemann2 = df_current_predefined.copy()
-	# lifetime.elactic_wiedemann2['tag'] = 'elactic_wiedemann2'
-	# lifetime.elactic_wiedemann2['value'] = elactic_scattering_wiedemann2( 2.5,
-	# 																  CONSTANTS_CONFIG.siberia2.eA_mm_mrad,
-	# 																  CONSTANTS_CONFIG.siberia2.AverageBetatronFunction,
-	# 																  CONSTANTS_CONFIG.siberia2.P_Torr * 1e9 )
+	lifetime.elastic_wiedemann2 = df_current_predefined.copy()
+	lifetime.elastic_wiedemann2['tag'] = 'elastic_wiedemann2'
+	lifetime.elastic_wiedemann2['value'] = elastic_scattering_wiedemann2( 2.5,
+																	  CONSTANTS_CONFIG.siberia2.eA_mm_mrad,
+																	  CONSTANTS_CONFIG.siberia2.AverageBetatronFunction,
+																	  CONSTANTS_CONFIG.siberia2.P_Torr * 1e9 )
 
 	# ################################################################################
 
 	# lifetime.brem_wiedemann = df_current_predefined.copy()
-	# lifetime.brem_wiedemann['tag'] = 'bremstahlung_wiedemann'
-	# lifetime.brem_wiedemann['value'] = bremstahlung_scattering_wiedemann(
+	# lifetime.brem_wiedemann['tag'] = 'bremhsstrahlung_wiedemann'
+	# lifetime.brem_wiedemann['value'] = bremhsstrahlung_scattering_wiedemann(
 	# 													P_Torr=CONSTANTS_CONFIG.siberia2.P_Torr,
 	# 													energy_acceptance=0.02)
 
  	# ################################################################################
 
-	# lifetime.elactic_chao = df_current_predefined.copy()
-	# lifetime.elactic_chao['tag'] = 'elactic_chao'
-	# lifetime.elactic_chao['value'] = elactic_scattering_chao(
-	# 	beta=CONSTANTS_CONFIG.siberia2.beta,
-	# 	nZ=CONSTANTS_CONFIG.n_Z_avg,
-	# 	Z=CONSTANTS_CONFIG.Z_avg,
-	# 	A_acceptance=CONSTANTS_CONFIG.siberia2.eA,
-	# 	beta_func_value=CONSTANTS_CONFIG.siberia2.AverageBetatronFunction,
-	# 	gamma=CONSTANTS_CONFIG.siberia2.gamma,
-	# 	P_Torr=CONSTANTS_CONFIG.siberia2.P_Torr,
-	# 	T_K=290
-	# ) 
+	lifetime.elastic_chao = df_current_predefined.copy()
+	lifetime.elastic_chao['tag'] = 'elastic_chao'
+	lifetime.elastic_chao['value'] = elastic_scattering_chao(
+		beta=CONSTANTS_CONFIG.siberia2.beta,
+		nZ=CONSTANTS_CONFIG.n_Z_avg,
+		Z=CONSTANTS_CONFIG.Z_avg,
+		A_acceptance=CONSTANTS_CONFIG.siberia2.eA,
+		beta_func_value=CONSTANTS_CONFIG.siberia2.AverageBetatronFunction,
+		gamma=CONSTANTS_CONFIG.siberia2.gamma,
+		P_Torr=CONSTANTS_CONFIG.siberia2.P_Torr,
+		T_K=CONSTANTS_CONFIG.T_gas_K
+	) 
 
 	# ################################################################################
 
@@ -190,8 +190,8 @@ if __name__ == "__main__":
 	# print(X0)
 	# X0 = 3725
 	# lifetime.brem_chao = df_current_predefined.copy()
-	# lifetime.brem_chao['tag'] = 'bremstahlung_chao'
-	# lifetime.brem_chao['value'] = bremstahlung_scattering_chao(beta=CONSTANTS_CONFIG.siberia2.beta,
+	# lifetime.brem_chao['tag'] = 'bremhsstrahlung_chao'
+	# lifetime.brem_chao['value'] = bremhsstrahlung_scattering_chao(beta=CONSTANTS_CONFIG.siberia2.beta,
 	# 															nZ=CONSTANTS_CONFIG.n_Z_avg,
 	# 															A=10e-3,
 	# 															X0=X0,
@@ -201,7 +201,7 @@ if __name__ == "__main__":
 
 	# ################################################################################
 
-	# tau_e = elactic_e(CONSTANTS_CONFIG.siberia2.gamma,
+	# tau_e = elastic_e(CONSTANTS_CONFIG.siberia2.gamma,
 	# 			   7,
 	# 			   CONSTANTS_CONFIG.siberia2.AverageBetatronXFunction,
 	# 			   CONSTANTS_CONFIG.siberia2.AverageBetatronYFunction,
@@ -221,11 +221,12 @@ if __name__ == "__main__":
 			# lifetime.simple
 			# ,
 			# lifetime.pascal ,
-			lifetime.elactic_wiedemann
+			# lifetime.elastic_wiedemann
 			# ,
-			# lifetime.elactic_wiedemann2
+			# lifetime.elastic_wiedemann2
 			# ,
-			# lifetime.elactic_chao,
+			lifetime.elastic_chao
+			# ,
 			# lifetime.brem_wiedemann,
 			# lifetime.brem_chao
 			],

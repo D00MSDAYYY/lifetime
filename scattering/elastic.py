@@ -3,7 +3,7 @@ import CONSTANTS_CONFIG
 import numpy as np
 from scipy import constants
 
-def elactic_scattering_wiedemann(beta, P_Torr, z, Z, p, theta_max):
+def elastic_scattering_wiedemann(beta, P_Torr, z, Z, p, theta_max):
 	"""
 	Вычисляет время жизни пучка из-за рассеяния на остаточном газе в системе CGS.
 
@@ -39,7 +39,7 @@ def elactic_scattering_wiedemann(beta, P_Torr, z, Z, p, theta_max):
 
 	return tau_hours
 
-def elactic_scattering_wiedemann2(p_CGS, eA, b_m, P_nTorr):
+def elastic_scattering_wiedemann2(p_CGS, eA, b_m, P_nTorr):
 	"""
 	Вычисляет время жизни пучка из-за рассеяния на остаточном газе в системе CGS.
 
@@ -58,7 +58,7 @@ def elactic_scattering_wiedemann2(p_CGS, eA, b_m, P_nTorr):
 
 	return tau_hours
 
-def elactic_scattering_chao(beta, nZ, Z, A_acceptance, beta_func_value, gamma, P_Torr, T_K):
+def elastic_scattering_chao(beta, nZ, Z, A_acceptance, beta_func_value, gamma, P_Torr, T_K):
 	"""
 
 	handbook_of_accelerator_physics_and_engineering_2ed_chao.pdf стр 272
@@ -86,18 +86,3 @@ def elactic_scattering_chao(beta, nZ, Z, A_acceptance, beta_func_value, gamma, P
 	tau = 1 / inv / 3600
 
 	return tau
-
-
-def elactic_e(gamma, Z, beta_x, beta_y, beta_avg, A_x, A_y, P):
-	r_e, _, _ = CONSTANTS_CONFIG.constants.physical_constants['classical electron radius']
-
-	n_A = 7.07e22
-
-	paren = beta_avg * beta_x / A_x**2 + beta_avg * beta_y / A_y**2
-
-	inv = 2 * np.pi * ( r_e / gamma )**2 * Z * ( Z + 1 ) * CONSTANTS_CONFIG.constants.c * n_A * P * paren
-
-	tau = 1 / inv / 3600
-
-	return tau
-
