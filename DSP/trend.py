@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import datetime
 
 # Чтение данных из CSV файла
 def read_sensor_data(filename):
