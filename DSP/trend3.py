@@ -73,7 +73,7 @@ current_df['timestamp'] = pd.to_datetime(current_df['timestamp'])
 sensor_name = current_df['sensor_name'][0]
 
 current_df['value'] = current_df['value'].astype(float)
-current_df['value'] = current_df['value'].rolling(window=15, center=True, min_periods=1).mean()
+current_df['value'] = current_df['value'].rolling(window=31, center=True, min_periods=1).mean()
 
 y_predicted, A_fit, tau_fit, C_fit = find_exp_trend(current_df)
 
