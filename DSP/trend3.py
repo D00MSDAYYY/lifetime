@@ -62,19 +62,13 @@ def dft(df):
 	return magnitude, frequencies_half
 
 
-filename = '../data/beam/misc/2025-06-30.csv'
+filename = '../data/beam/misc/tt.csv'
 
-current_df = pd.read_csv(filename, 
-				sep=';', 
-				header=None, 
-				names=['sensor_name', 'timestamp', 'value'])
+current_df = pd.read_csv(filename, sep=';', header=None, names=['sensor_name', 'timestamp', 'value'])
 
 current_df['timestamp'] = pd.to_datetime(current_df['timestamp'])
 sensor_name = current_df['sensor_name'][0]
 
-parts = np.array_split(current_df, 20)
-
-plt.figure(figsize=(12, 8))
 colors = [
     '#FF0000',  # ярко-красный
     '#0000FF',  # ярко-синий  
@@ -98,12 +92,25 @@ colors = [
     '#4682B4'   # стальной синий
 ]
 
+parts = np.array_split(current_df, 500)
+
 for i, part in enumerate(parts): 
 	current_df = pd.DataFrame(part)
 	current_df['value'] = current_df['value'].astype(float)
 	# current_df['value'] = current_df['value'].rolling(window=1, center=True, min_periods=1).mean()
 
-	y_predicted, A_fit, tau_fit, C_fit = find_exp_trend(current_df)
+	# plt.figure(figsize=(12, 8))
+	# plt.xlabel('Время')
+	# plt.ylabel('Значение')
+	# plt.title(f'Исходные данные с {sensor_name}')
+	# plt.grid(True, alpha=0.3)
+	# plt.xticks(rotation=45)
+	# plt.tight_layout()
+	# plt.plot(current_df['timestamp'], current_df['value'], 'bo-', 
+	# 			alpha=0.7, markersize=4)
+	# plt.legend()
+
+	# y_predicted, A_fit, tau_fit, C_fit = find_exp_trend(current_df)
 
 	# plt.figure(figsize=(12, 8))
 	# plt.xlabel('Время')
@@ -120,8 +127,8 @@ for i, part in enumerate(parts):
 	# plt.legend()
 
 	untrended_df = current_df.copy()
-	untrended_df['value'] = current_df['value'] - y_predicted
-	untrended_df['value'] = untrended_df['value'] - untrended_df['value'].mean()
+	# untrended_df['value'] = current_df['value'] - y_predicted
+	# untrended_df['value'] = untrended_df['value'] - untrended_df['value'].mean()
 
 	# plt.figure(figsize=(12, 8))
 	# plt.plot(untrended_df['timestamp'], untrended_df['value'], 'bo-', 
@@ -142,9 +149,9 @@ for i, part in enumerate(parts):
 
 	color = colors[i % len(colors)]
 
-	plt.plot(frequencies_half, magnitude_db, color=color, linewidth=1, alpha=0.4, label='Исходная')
+	plt.plot(frequencies_half, magnitude_db, color="grey", linewidth=1, alpha=0.4, label='Исходная')
 	# plt.plot(frequencies_half, magnitude_filtered_db, color="grey", linewidth=1, alpha=0.5, label='Сглаженная')
-	# plt.legend()
+	plt.legend()
 	plt.xlabel('Частота (Гц)')
 	plt.ylabel('Амплитуда (дБ)')
 	plt.title('Амплитудный спектр')
