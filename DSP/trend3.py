@@ -6,7 +6,7 @@ from sklearn.metrics import r2_score, mean_squared_error
 
 
 def find_exp_trend(df):
-	def exponential_decay(t, A, tau):
+	def exponential_decay(t, A, tau, C):
 		"""
 		Модель экспоненциального затухания
 		y = A * exp(-t/tau) + C
@@ -15,22 +15,23 @@ def find_exp_trend(df):
 		tau - постоянная времени (характерное время затухания)
 		C - постоянное смещение (асимптота)
 		"""
-		return A * np.exp(-t / tau) 
+		return A * np.exp(-t / tau) + C
 
 	x_data = (current_df['timestamp'] - current_df['timestamp'].min()).dt.total_seconds()
 	y_data = current_df['value'].values
 
 	A0 = y_data[0] - y_data[-1] 
 	tau0 = (x_data.iloc[-1] - x_data.iloc[0]) / 5 
+	C0 = y_data[-1]
 
-	initial_guess = [A0, tau0]
+	initial_guess = [A0, tau0, C0]
 
 	try:
 		popt, pcov = curve_fit(exponential_decay, 
 								x_data, y_data, 
 								p0=initial_guess)
 		
-		A_fit, tau_fit = popt
+		A_fit, tau_fit, C_fit = popt
 		errors = np.sqrt(np.diag(pcov))
 
 		y_pred = exponential_decay(x_data, *popt)
@@ -38,11 +39,11 @@ def find_exp_trend(df):
 		r2 = r2_score(y_data, y_pred)
 		rmse = np.sqrt(mean_squared_error(y_data, y_pred))
 
-		print('parameters:', ' A = ', A_fit, ', tau = ', tau_fit)
-		print('errors:', ' A_error = ', errors[0], ', tau_error = ', errors[1])
+		print('parameters:', ' A = ', A_fit, ', tau = ', tau_fit, ', C = ', C_fit)
+		print('errors:', ' A_error = ', errors[0], ', tau_error = ', errors[1], ', C_error = ', errors[2])
 		print('metrics:', ' R2 = ', r2, ', RMSE = ', rmse)
 
-		return y_pred, A_fit, tau_fit
+		return y_pred, A_fit, tau_fit, C_fit
 
 	except Exception as e:
 		print(f"Ошибка при подгонке: {e}")
@@ -105,7 +106,7 @@ for i, part in enumerate(parts):
 	part_df['value'] = part_df['value'].astype(float)
 	part_df['value'] = part_df['value'].rolling(window=2, center=True, min_periods=1).mean()
 
-	y_predicted, A_fit, tau_fit = find_exp_trend(part_df)
+	y_predicted, A_fit, tau_fit, _ = find_exp_trend(part_df)
 
 	y_df = part_df.copy()
 	y_df['value'] = y_predicted
