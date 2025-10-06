@@ -93,7 +93,7 @@ colors = [
     '#4682B4'   # стальной синий
 ]
 
-parts = np.array_split(current_df, 10)
+parts = np.array_split(current_df, 1000)
 
 date_tau_list = []
 
